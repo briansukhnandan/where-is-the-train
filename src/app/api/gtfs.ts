@@ -10,6 +10,7 @@ const L_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%
 const IRT_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs";
 
 type _PossiblyNullishString = string | null | undefined;
+type _PossiblyNullishNumber = number | null | undefined;
 
 // Taken directly from the MTA.
 type _Stop = {
@@ -27,7 +28,9 @@ type _FeedData = {
     startTime: _PossiblyNullishString;
     stops: {
       arrivalTime: string;
+      arrivalTimeRaw: string; // Unix timestamp
       departureTime: string;
+      departureTimeRaw: string; // Unix timestamp
       stop: {
         id: _PossiblyNullishString,
         name: _PossiblyNullishString,
@@ -93,7 +96,9 @@ const parseGtfsFeed = async(specificEndpoint: string) => {
           if (!stop.arrival?.time || !stop.departure?.time) {
             return {
               arrivalTime: "",
+              arrivalTimeRaw: null,
               departureTime: "",
+              departureTimeRaw: null,
               stop: {
                 id: validStopId,
                 name: validStopName
@@ -108,7 +113,9 @@ const parseGtfsFeed = async(specificEndpoint: string) => {
 
           return {
             arrivalTime: validArrivalTime,
+            arrivalTimeRaw: stop.arrival.time,
             departureTime: validDepartureTime,
+            departureTimeRaw: stop.departure.time,
             stop: {
               id: validStopId,
               name: validStopName,
