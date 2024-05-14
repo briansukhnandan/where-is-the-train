@@ -28,9 +28,9 @@ type _FeedData = {
     startTime: _PossiblyNullishString;
     stops: {
       arrivalTime: string;
-      arrivalTimeRaw: string; // Unix timestamp
+      arrivalTimeRaw: _PossiblyNullishNumber; // Unix timestamp
       departureTime: string;
-      departureTimeRaw: string; // Unix timestamp
+      departureTimeRaw: _PossiblyNullishNumber; // Unix timestamp
       stop: {
         id: _PossiblyNullishString,
         name: _PossiblyNullishString,
