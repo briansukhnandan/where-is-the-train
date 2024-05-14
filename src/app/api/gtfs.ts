@@ -1,4 +1,5 @@
 import { transit_realtime as TransitRealtime } from "gtfs-realtime-bindings"
+import stops from "./stops.json";
 
 const ACE_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace";
 const BDFM_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm";
@@ -10,6 +11,13 @@ const IRT_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyc
 
 type _PossiblyNullishString = string | null | undefined;
 
+// Taken directly from the MTA.
+type _Stop = {
+  stop_id: string;
+  stop_name: string;
+  parent_station: string;
+}
+
 type _TripUpdate = TransitRealtime.ITripUpdate;
 type _TrainSymbol = string;
 type _FeedData = {
@@ -20,13 +28,24 @@ type _FeedData = {
     stops: {
       arrivalTime: string;
       departureTime: string;
-      stopId: string;
+      stop: {
+        id: _PossiblyNullishString,
+        name: _PossiblyNullishString,
+      }
     }[];
   }[];
 };
 type SubwaySchedule = Record<_TrainSymbol, _FeedData>;
 
-export const parseGtfsFeed = async(specificEndpoint: string) => {
+const getStopMap = () => {
+  const stopMap: Record<string, _Stop> = {};
+  for (const stop of stops) {
+    stopMap[stop.stop_id] = stop;
+  }
+  return stopMap;
+}
+
+const parseGtfsFeed = async(specificEndpoint: string) => {
   const tripIdToUpdateMap: Record<string, _TripUpdate> = {};
   try {
     const response = await fetch(specificEndpoint);
@@ -52,6 +71,7 @@ export const parseGtfsFeed = async(specificEndpoint: string) => {
   }
 
   const dataFromThisFeed: SubwaySchedule = {};
+  const stopMap = getStopMap();
   for (const { stopTimeUpdate, trip } of Object.values(tripIdToUpdateMap)) {
     if (!stopTimeUpdate?.length) continue;
     if (trip.routeId && trip.startDate) {
@@ -67,11 +87,17 @@ export const parseGtfsFeed = async(specificEndpoint: string) => {
         startDate: validStartDate,
         startTime: validStartTime,
         stops: (stopTimeUpdate ?? []).map(stop => {
+          const validStopId = stop.stopId ? stop.stopId : null;
+          const validStopName = validStopId && !!stopMap[validStopId] ? stopMap[validStopId]?.stop_name ?? "" : null;
+
           if (!stop.arrival?.time || !stop.departure?.time) {
             return {
               arrivalTime: "",
               departureTime: "",
-              stopId: stop.stopId as string
+              stop: {
+                id: validStopId,
+                name: validStopName
+              }
             };
           }
 
@@ -83,7 +109,10 @@ export const parseGtfsFeed = async(specificEndpoint: string) => {
           return {
             arrivalTime: validArrivalTime,
             departureTime: validDepartureTime,
-            stopId: stop.stopId as string
+            stop: {
+              id: validStopId,
+              name: validStopName,
+            }
           };
         }).filter(stop => !!stop.arrivalTime)
       });
