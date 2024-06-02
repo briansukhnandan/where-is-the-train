@@ -9,7 +9,7 @@ export default function Home() {
     parseAllSubwaySchedules().then((schedule) => {
       setSchedules(schedule);
     });
-  }, [])
+  }, []);
 
   console.log("all schedules", schedules);
 

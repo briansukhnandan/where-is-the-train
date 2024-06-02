@@ -1,5 +1,6 @@
 import { transit_realtime as TransitRealtime } from "gtfs-realtime-bindings"
 import stops from "./stops.json";
+import { SubwaySchedule, FeedData, Stop, _TripUpdate, TripActivity } from "../types";
 
 const ACE_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace";
 const BDFM_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm";
@@ -9,39 +10,8 @@ const NQRW_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/ny
 const L_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l";
 const IRT_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs";
 
-type _PossiblyNullishString = string | null | undefined;
-type _PossiblyNullishNumber = number | null | undefined;
-
-// Taken directly from the MTA.
-type _Stop = {
-  stop_id: string;
-  stop_name: string;
-  parent_station: string;
-}
-
-type _TripUpdate = TransitRealtime.ITripUpdate;
-type _TrainSymbol = string;
-type _FeedData = {
-  trips: {
-    tripId: string;
-    startDate: string;
-    startTime: _PossiblyNullishString;
-    stops: {
-      arrivalTime: string;
-      arrivalTimeRaw: _PossiblyNullishNumber; // Unix timestamp
-      departureTime: string;
-      departureTimeRaw: _PossiblyNullishNumber; // Unix timestamp
-      stop: {
-        id: _PossiblyNullishString,
-        name: _PossiblyNullishString,
-      }
-    }[];
-  }[];
-};
-type SubwaySchedule = Record<_TrainSymbol, _FeedData>;
-
 const getStopMap = () => {
-  const stopMap: Record<string, _Stop> = {};
+  const stopMap: Record<string, Stop> = {};
   for (const stop of stops) {
     stopMap[stop.stop_id] = stop;
   }
@@ -91,7 +61,9 @@ const parseGtfsFeed = async(specificEndpoint: string) => {
         startTime: validStartTime,
         stops: (stopTimeUpdate ?? []).map(stop => {
           const validStopId = stop.stopId ? stop.stopId : null;
-          const validStopName = validStopId && !!stopMap[validStopId] ? stopMap[validStopId]?.stop_name ?? "" : null;
+          const validStopName = validStopId && !!stopMap[validStopId] 
+            ? stopMap[validStopId]?.stop_name ?? "" 
+            : null;
 
           if (!stop.arrival?.time || !stop.departure?.time) {
             return {
@@ -152,4 +124,19 @@ export const parseAllSubwaySchedules = async() => {
   }
 
   return allSchedules;
+}
+
+/** 
+ * For each trip for a Train line, we will calculate the following:
+ * - The station the train is at or previously departed from
+ * - Whether or not it's at a station or en route
+ * - If the train is en route, the time until next station.
+ */
+
+const getActivityOfAllTrains = (feedData: FeedData): TripActivity[] => {
+  const trips = feedData.trips;
+  for (const trip of trips) {
+    
+  }
+  return []
 }
