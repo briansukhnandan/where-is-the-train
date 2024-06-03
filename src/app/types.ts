@@ -10,36 +10,53 @@ export enum TrainStatus {
 }
 
 // Taken directly from the MTA.
-export type Stop = {
+export type MtaStop = {
   stop_id: string;
   stop_name: string;
   parent_station: string;
 }
 
+// Our own Stop datatype.
+export type Stop = {
+  arrivalTime: string;
+  arrivalTimeRaw: _PossiblyNullishNumber; // Unix timestamp
+  departureTime: string;
+  departureTimeRaw: _PossiblyNullishNumber; // Unix timestamp
+  // The departure times provided by the MTA are literally 
+  // equivalent to the arrival times... Instead we put a 30s 
+  // addition to the arrival time which acts as a pseudo departure 
+  // time for our calculations.
+  fixedDepartureTimeRaw: _PossiblyNullishNumber;
+  stop: {
+    id: _PossiblyNullishString,
+    name: _PossiblyNullishString,
+  }
+};
+
 export type _TripUpdate = TransitRealtime.ITripUpdate;
 export type TrainSymbol = string;
+export type Trip = {
+  tripId: string;
+  startDate: string;
+  startTime: _PossiblyNullishString;
+  stops: Stop[];
+};
 export type FeedData = {
-  trips: {
-    tripId: string;
-    startDate: string;
-    startTime: _PossiblyNullishString;
-    stops: {
-      arrivalTime: string;
-      arrivalTimeRaw: _PossiblyNullishNumber; // Unix timestamp
-      departureTime: string;
-      departureTimeRaw: _PossiblyNullishNumber; // Unix timestamp
-      stop: {
-        id: _PossiblyNullishString,
-        name: _PossiblyNullishString,
-      }
-    }[];
-  }[];
+  trips: Trip[];
 };
 export type SubwaySchedule = Record<TrainSymbol, FeedData>;
 
 export type TripActivity = {
   tripId: string;
-  status: TrainStatus; 
+} & ({
+  status: TrainStatus.OUT_OF_SERVICE;
+} | {
+  status: TrainStatus.AT_STATION; 
   lastSeenStop: Stop;
-  timeUntilNextStop: number;
-}
+} | {
+  // Only available on route.
+  status: TrainStatus.EN_ROUTE
+  lastSeenStop: Stop;
+  nextStop?: Stop;
+  timeUntilNextStop?: number;
+});

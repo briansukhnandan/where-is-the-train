@@ -1,6 +1,6 @@
 import { transit_realtime as TransitRealtime } from "gtfs-realtime-bindings"
 import stops from "./stops.json";
-import { SubwaySchedule, FeedData, Stop, _TripUpdate, TripActivity } from "../types";
+import { SubwaySchedule, FeedData, MtaStop, _TripUpdate, TripActivity, Trip, TrainStatus } from "../types";
 
 const ACE_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace";
 const BDFM_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm";
@@ -11,7 +11,7 @@ const L_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%
 const IRT_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs";
 
 const getStopMap = () => {
-  const stopMap: Record<string, Stop> = {};
+  const stopMap: Record<string, MtaStop> = {};
   for (const stop of stops) {
     stopMap[stop.stop_id] = stop;
   }
@@ -71,6 +71,7 @@ const parseGtfsFeed = async(specificEndpoint: string) => {
               arrivalTimeRaw: null,
               departureTime: "",
               departureTimeRaw: null,
+              fixedDepartureTimeRaw: null,
               stop: {
                 id: validStopId,
                 name: validStopName
@@ -82,12 +83,21 @@ const parseGtfsFeed = async(specificEndpoint: string) => {
             .toLocaleTimeString("en-US");
           const validDepartureTime = new Date((stop.departure.time as number) * 1000)
             .toLocaleTimeString("en-US");
+          
+          let fixedDepartureTimeRaw = null;
+          if (
+            stop.arrival.time && stop.departure.time && 
+            stop.arrival.time === stop.departure.time
+          ) {
+            fixedDepartureTimeRaw = stop.arrival.time + 30;
+          }
 
           return {
             arrivalTime: validArrivalTime,
             arrivalTimeRaw: stop.arrival.time,
             departureTime: validDepartureTime,
             departureTimeRaw: stop.departure.time,
+            fixedDepartureTimeRaw,
             stop: {
               id: validStopId,
               name: validStopName,
@@ -126,17 +136,73 @@ export const parseAllSubwaySchedules = async() => {
   return allSchedules;
 }
 
-/** 
- * For each trip for a Train line, we will calculate the following:
- * - The station the train is at or previously departed from
- * - Whether or not it's at a station or en route
- * - If the train is en route, the time until next station.
- */
-
-const getActivityOfAllTrains = (feedData: FeedData): TripActivity[] => {
+export const getActivityOfAllTrips = (feedData: FeedData): TripActivity[] => {
   const trips = feedData.trips;
+  const tripActivites: TripActivity[] = [];
   for (const trip of trips) {
-    
+    const tripActivity = processTrip(trip);
+    tripActivites.push(tripActivity);
   }
-  return []
+  return tripActivites;
+}
+
+const processTrip = (trip: Trip): TripActivity => {
+  const currStops = trip.stops;
+  if (!currStops.length) {
+    return {
+      tripId: trip.tripId,
+      status: TrainStatus.OUT_OF_SERVICE
+    };
+  }
+
+  /** 
+   * Calculate whether or not the train is en route or at a station.
+   * This can be done by:
+   *    - First identifying the current UNIX time.
+   *    - We also keep track of an outside variable which describes if 
+   *      the train has past the previous stop: hasPastLastStop
+   *    - Loop through each stop and evaluate the following:
+   *      - If the current time is BETWEEN the arrival/departure time of the train at that stop.
+   *        - Train is AT_STATION.
+   *      - Else If the current time is before the arrival time of the current stop and hasPastLastStop
+   *        is TRUE, the train is EN_ROUTE.
+   *      - Else If the current time is after the arrival/departure time of the current station,
+   *        it has past this station.
+   */
+  const currUnixTime = Date.now();
+  let lastSeenStop = currStops[0];
+  for (const stopIdx in currStops) {
+    const stop = currStops[stopIdx];
+    // If the arrival/departure times taken from the MTA are the same val,
+    // we use the fixedDepartureTimeRaw.
+    const departureTimeToUse = stop.arrivalTimeRaw === stop.departureTimeRaw
+      ? stop.fixedDepartureTimeRaw
+      : stop.departureTimeRaw;
+
+    if (
+      stop.arrivalTimeRaw && 
+      (currUnixTime >= stop.arrivalTimeRaw) && 
+      departureTimeToUse && 
+      (currUnixTime <= departureTimeToUse)
+    ) {
+      lastSeenStop = stop;
+      return {
+        tripId: trip.tripId,
+        status: TrainStatus.AT_STATION,
+        lastSeenStop
+      }
+    } else if (stop.arrivalTimeRaw && currUnixTime < stop.arrivalTimeRaw) {
+      return {
+        tripId: trip.tripId,
+        status: TrainStatus.EN_ROUTE,
+        lastSeenStop,
+        nextStop: currStops[parseInt(stopIdx) + 1]
+      };
+    }
+  }
+
+  return {
+    tripId: trip.tripId,
+    status: TrainStatus.OUT_OF_SERVICE
+  };
 }
