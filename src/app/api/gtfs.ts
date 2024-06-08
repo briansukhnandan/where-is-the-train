@@ -184,6 +184,7 @@ const processTrip = (trip: Trip): TripStatus => {
   let lastSeenStop = currStops[0];
   for (const stopIdx in currStops) {
     const stop = currStops[stopIdx];
+    lastSeenStop = stop;
     // If the arrival/departure times taken from the MTA are the same val,
     // we use the fixedDepartureTimeRaw.
     const departureTimeToUse = stop.arrivalTimeRaw === stop.departureTimeRaw
@@ -210,8 +211,6 @@ const processTrip = (trip: Trip): TripStatus => {
         nextStop: currStops[parseInt(stopIdx) + 1]
       };
     }
-
-    lastSeenStop = stop;
   }
 
   return {
