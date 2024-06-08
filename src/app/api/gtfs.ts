@@ -84,6 +84,8 @@ const parseGtfsFeed = async(specificEndpoint: string) => {
           const validDepartureTime = new Date((stop.departure.time as number) * 1000)
             .toLocaleTimeString("en-US");
           
+          // Addresses a weird issue where some MTA data 
+          // has the same arrival/departure time.
           let fixedDepartureTimeRaw = null;
           if (
             stop.arrival.time && stop.departure.time && 
@@ -169,7 +171,7 @@ const processTrip = (trip: Trip): TripActivity => {
    *      - Else If the current time is after the arrival/departure time of the current station,
    *        it has past this station.
    */
-  const currUnixTime = Date.now();
+  const currUnixTimeSeconds = parseInt(`${Date.now() / 1000}`);
   let lastSeenStop = currStops[0];
   for (const stopIdx in currStops) {
     const stop = currStops[stopIdx];
@@ -181,9 +183,9 @@ const processTrip = (trip: Trip): TripActivity => {
 
     if (
       stop.arrivalTimeRaw && 
-      (currUnixTime >= stop.arrivalTimeRaw) && 
+      (currUnixTimeSeconds >= stop.arrivalTimeRaw) && 
       departureTimeToUse && 
-      (currUnixTime <= departureTimeToUse)
+      (currUnixTimeSeconds <= departureTimeToUse)
     ) {
       lastSeenStop = stop;
       return {
@@ -191,7 +193,7 @@ const processTrip = (trip: Trip): TripActivity => {
         status: TrainStatus.AT_STATION,
         lastSeenStop
       }
-    } else if (stop.arrivalTimeRaw && currUnixTime < stop.arrivalTimeRaw) {
+    } else if (stop.arrivalTimeRaw && currUnixTimeSeconds < stop.arrivalTimeRaw) {
       return {
         tripId: trip.tripId,
         status: TrainStatus.EN_ROUTE,
