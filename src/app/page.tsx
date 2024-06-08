@@ -17,7 +17,7 @@ import {
 } from "./types";
 import { partition } from "./util";
 import Image from 'next/image'
-import { Box, Button, IconButton, Tooltip } from "@chakra-ui/react";
+import { Box, Button, Tooltip } from "@chakra-ui/react";
 
 const trainLines = [
   "A", "B", "C", "D", "E",
