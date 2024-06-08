@@ -491,7 +491,11 @@ const TrainsAtStationDisplay = ({
     <Tooltip label={
       <>
         <Box>{"Currently At Station"}</Box>
-        <Box>{`Next Station: ${stat?.nextStop?.stop.name}`}</Box>
+        {
+          stat?.nextStop?.stop?.name && (
+            <Box>{`Next Station: ${stat?.nextStop?.stop.name}`}</Box>
+          )
+        }
       </>
     }>
       <Image 
