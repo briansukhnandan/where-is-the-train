@@ -15,7 +15,7 @@ import {
   TrainStatus, 
   TripStatus 
 } from "./types";
-import { partition } from "./util";
+import { TRAIN_LINE_TO_COLOR, partition } from "./util";
 import Image from 'next/image'
 import { Box, Button, Tooltip } from "@chakra-ui/react";
 
@@ -31,10 +31,7 @@ export default function Home() {
   const [schedules, setSchedules] = useState<SubwaySchedule>({});
   const [trainLine, setTrainLine] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false); 
-  const [
-    timeButtonWasClicked, 
-    setTimeButtonWasClicked
-  ] = useState(0);
+  const [refreshTimer, setRefreshTimer] = useState(0);
 
   const getNewSchedule = (line: string) => {
     setIsLoading(true);
@@ -52,22 +49,38 @@ export default function Home() {
     }
   }, [trainLine]);
 
+  // Separate from the useEffect above, as we want this 
+  // one to run on an interval.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (refreshTimer > 0) {
+        setRefreshTimer((r) => r-1);
+      }
+    }, 1_000);
+
+    return () => clearInterval(interval);
+  }, [refreshTimer, setRefreshTimer]);
+
   return (
     <main className={styles.main}>
       <h1 style={{ paddingBottom: "30px", fontSize: "40px" }}>
         <u><b>{"Where are the NYC Subway Trains?"}</b></u>
       </h1>
       <Box paddingBottom={"40px"} textAlign={"center"}>
-        <Tooltip label="This Button will be disabled after 2 clicks!">
+        <Tooltip label="This button has a 1 minute cooldown once clicked!">
           <Button 
             colorScheme="purple"
-            isDisabled={!trainLine || timeButtonWasClicked >= 2}
+            isDisabled={!trainLine || refreshTimer > 0}
             onClick={() => {
               getNewSchedule(trainLine);
-              setTimeButtonWasClicked((v) => v + 1);
+              setRefreshTimer(60);
             }}
           >
-            Refresh Data!
+            { 
+              refreshTimer > 0 
+                ? `Refresh available in ${refreshTimer} seconds!` 
+                : "Refresh Data!" 
+            }
           </Button>
         </Tooltip>
         { isLoading && <Box>{"Loading..."}</Box> }
@@ -76,10 +89,10 @@ export default function Home() {
         <Box fontSize={"25px"}>
           <i>Pick a Train to get started!</i>
         </Box>
-      ) }
+      )}
       <TrainLineDisplay selectCallback={setTrainLine} />
       {
-        trainLine ? (
+        (trainLine && !isLoading) ? (
           <Box paddingTop={"50px"}>
             <FeedDisplay 
               trainId={trainLine} 
@@ -397,27 +410,33 @@ const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => 
   }
   
   return (
-    <Box>
-      <Box 
-        paddingBottom={"30px"}
-        textAlign={"center"}
-      >
-        <Box
-          fontSize={"40px"}
+    <Box 
+      border={"solid"} 
+      borderColor={TRAIN_LINE_TO_COLOR[trainId] ?? "black"}
+      borderRadius={"20px"}
+    >
+      <Box margin={5}>
+        <Box 
+          paddingBottom={"40px"}
+          textAlign={"center"}
         >
-          <i>Stops on this Route</i>
+          <Box
+            fontSize={"40px"}
+          >
+            <i>Stops on this Route</i>
+          </Box>
+          <h6>{"* You can also hover over individual Train icons for info!"}</h6>
         </Box>
-        <h6>{"* You can also hover over individual Train icons for info!"}</h6>
-      </Box>
-      <Box>
-        {stops.map(stop => 
-          <StopDisplay
-            key={stop.id}
-            trainId={trainId} 
-            stop={stop} 
-            statuses={statuses} 
-          />
-        )}
+        <Box>
+          {stops.map(stop => 
+            <StopDisplay
+              key={stop.id}
+              trainId={trainId} 
+              stop={stop} 
+              statuses={statuses} 
+            />
+          )}
+        </Box>
       </Box>
     </Box>
   );
