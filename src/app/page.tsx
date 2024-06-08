@@ -11,8 +11,10 @@ import {
   FeedData, 
   StopIdName, 
   SubwaySchedule, 
+  TrainStatus, 
   TripActivity 
 } from "./types";
+import { partition } from "./util";
 
 export default function Home() {
   const [schedules, setSchedules] = useState<SubwaySchedule>({});
@@ -26,7 +28,6 @@ export default function Home() {
     getNewSetOfSchedules();
   }, []);
 
-  console.log("all schedules", schedules);
   if (!Object.keys(schedules).length) {
     return <div>Loading...</div>
   }
@@ -59,7 +60,14 @@ const StopDisplay = ({ stop, statuses }: {
   statuses: TripActivity[]
 }) => {
   const trainsAssociatedWithStop = getTrainsAssociatedWithStop(stop, statuses);
-  console.log(stop.name, trainsAssociatedWithStop);
+  const [
+    trainsAtStation, 
+    trainsEnRouteToStation
+  ] = partition(
+    trainsAssociatedWithStop, 
+    (trip) => trip.status === TrainStatus.AT_STATION
+  );
+
   return (
     <div
       style={{ 
@@ -68,7 +76,11 @@ const StopDisplay = ({ stop, statuses }: {
         paddingBottom: 5,
       }}
     >
-      { stop.name }
+      <div style={{ display: "flex", flexDirection: "row" }}>
+        <div>{ trainsAtStation.map(t => "-") }</div>
+        <div>{ stop.name }</div>
+        <div>{ trainsEnRouteToStation.map(t => "-") }</div>
+      </div>
     </div>
   );
 }
