@@ -51,18 +51,22 @@ export type FeedData = {
 };
 export type SubwaySchedule = Record<TrainSymbol, FeedData>;
 
+export type AtStationStatus = {
+  status: TrainStatus.AT_STATION; 
+  lastSeenStop: Stop;
+  nextStop?: Stop;
+}
+export type EnRouteStatus = {
+  status: TrainStatus.EN_ROUTE;
+  lastSeenStop: Stop;
+  nextStop?: Stop;
+  timeUntilNextStop?: number;
+}
 export type TripStatus = {
   tripId: string;
 } & ({
   status: TrainStatus.OUT_OF_SERVICE;
-} | {
-  status: TrainStatus.AT_STATION; 
-  lastSeenStop: Stop;
-  nextStop?: Stop;
-} | {
-  // Only available on route.
-  status: TrainStatus.EN_ROUTE
-  lastSeenStop: Stop;
-  nextStop?: Stop;
-  timeUntilNextStop?: number;
-});
+} 
+  | AtStationStatus 
+  | EnRouteStatus
+);

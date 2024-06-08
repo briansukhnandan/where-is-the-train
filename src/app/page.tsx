@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./page.module.css";
 import { 
   getActivityOfAllTrips, 
@@ -8,6 +8,7 @@ import {
   parseAllSubwaySchedules 
 } from "./api/gtfs";
 import { 
+  EnRouteStatus,
   FeedData, 
   StopIdName, 
   SubwaySchedule, 
@@ -16,11 +17,15 @@ import {
 } from "./types";
 import { partition } from "./util";
 import Image from 'next/image'
-import { Box } from "@chakra-ui/react";
+import { Box, Tooltip } from "@chakra-ui/react";
 
-const trainIdToImage: Record<string, string> = {
-  D: "/images/D_Train.png"
-}
+const trainLines = [
+  "A", "B", "C", "D", "E",
+  "F", "G", "J", "L", "M",
+  "N", "Q", "R", "S", "V",
+  "W", "Z", "1", "2", "3",
+  "4", "5", "6", "7"
+];
 
 export default function Home() {
   const [schedules, setSchedules] = useState<SubwaySchedule>({});
@@ -54,14 +59,23 @@ const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => 
   
   return (
     <Box>
-      {stops.map(stop => 
-        <StopDisplay
-          key={stop.id}
-          trainId={trainId} 
-          stop={stop} 
-          statuses={statuses} 
-        />
-      )}
+      <Box
+        fontSize={"40px"}
+      >
+        <u>
+          <i>Stops on this Route</i>
+        </u>
+      </Box>
+      <Box>
+        {stops.map(stop => 
+          <StopDisplay
+            key={stop.id}
+            trainId={trainId} 
+            stop={stop} 
+            statuses={statuses} 
+          />
+        )}
+      </Box>
     </Box>
   );
 }
@@ -71,6 +85,14 @@ const StopDisplay = ({ trainId, stop, statuses }: {
   stop: StopIdName,
   statuses: TripStatus[]
 }) => {
+  const trainIdToImage: Record<string, string> = useMemo(() => {
+    const mapping: Record<string, string> = {};
+    for (const trainLine of trainLines) {
+      mapping[trainLine] = `/images/${trainLine}_Train.png`
+    }
+    return mapping;
+  }, [trainLines]);
+
   const trainsAssociatedWithStop = getTrainsAssociatedWithStop(stop, statuses);
   const associatedIconPath = trainIdToImage[trainId];
   const [
@@ -89,7 +111,13 @@ const StopDisplay = ({ trainId, stop, statuses }: {
         paddingBottom: 6,
       }}
     >
-      <Box style={{ display: "flex", flexDirection: "row" }}>
+      <Box 
+        style={{ 
+          display: "flex", 
+          flexDirection: "row", 
+          alignItems: "center",
+          justifyContent: "center"
+        }}>
         <Box>
           {
             trainsAtStation.map(tripStatus => (
@@ -129,12 +157,14 @@ const TrainsAtStationDisplay = ({
   status: TripStatus 
 }) => {
   return (
-    <Image 
-      src={iconPath} 
-      alt="Train Icon" 
-      width={TRAIN_ICON_DISPLAY_SIZE} 
-      height={TRAIN_ICON_DISPLAY_SIZE} 
-    />
+    <Tooltip label="Currently At Station">
+      <Image 
+        src={iconPath} 
+        alt="Train Icon" 
+        width={TRAIN_ICON_DISPLAY_SIZE} 
+        height={TRAIN_ICON_DISPLAY_SIZE} 
+      />
+    </Tooltip>
   );
 }
 
@@ -145,12 +175,20 @@ const TrainsEnRouteDisplay = ({
   iconPath: string, 
   status: TripStatus 
 }) => {
+  const stat = status as EnRouteStatus;
   return (
-    <Image 
-      src={iconPath} 
-      alt="Train Icon" 
-      width={TRAIN_ICON_DISPLAY_SIZE} 
-      height={TRAIN_ICON_DISPLAY_SIZE} 
-    />
+    <Tooltip label={
+      <>
+        <Box>{`Arrival Time: ${stat?.nextStop?.arrivalTime}`}</Box>
+        <Box>{`Next Station: ${stat?.nextStop?.stop.name}`}</Box>
+      </>
+    }>
+      <Image 
+        src={iconPath} 
+        alt="Train Icon" 
+        width={TRAIN_ICON_DISPLAY_SIZE} 
+        height={TRAIN_ICON_DISPLAY_SIZE} 
+      />
+    </Tooltip>
   );
 }
