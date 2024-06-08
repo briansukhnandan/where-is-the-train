@@ -16,6 +16,7 @@ import {
 } from "./types";
 import { partition } from "./util";
 import Image from 'next/image'
+import { Box } from "@chakra-ui/react";
 
 const trainIdToImage: Record<string, string> = {
   D: "/images/D_Train.png"
@@ -52,11 +53,11 @@ const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => 
   }
   
   return (
-    <div>
+    <Box>
       {stops.map(stop => 
         <StopDisplay trainId={trainId} stop={stop} statuses={statuses} />
       )}
-    </div>
+    </Box>
   );
 }
 
@@ -76,15 +77,15 @@ const StopDisplay = ({ trainId, stop, statuses }: {
   );
 
   return (
-    <div
+    <Box
       style={{ 
         textAlign: "center", 
         paddingTop: 6,
         paddingBottom: 6,
       }}
     >
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        <div>
+      <Box style={{ display: "flex", flexDirection: "row" }}>
+        <Box>
           {
             trainsAtStation.map(tripStatus => (
               <TrainsAtStationDisplay 
@@ -93,16 +94,16 @@ const StopDisplay = ({ trainId, stop, statuses }: {
               />
             ))
           }
-        </div>
-        <div 
+        </Box>
+        <Box 
           style={{ 
             fontSize: "22px", 
             transform: "translate(0px, 2px)" 
           }}
         >
           { stop.name }
-        </div>
-        <div>
+        </Box>
+        <Box>
           { 
             trainsEnRouteToStation.map(tripStatus => (
               <TrainsEnRouteDisplay 
@@ -111,9 +112,9 @@ const StopDisplay = ({ trainId, stop, statuses }: {
               />
             )) 
           }
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
