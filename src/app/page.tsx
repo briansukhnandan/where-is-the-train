@@ -385,10 +385,16 @@ const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => 
   
   return (
     <Box>
-      <Box
-        fontSize={"40px"}
+      <Box 
+        paddingBottom={"30px"}
+        textAlign={"center"}
       >
-        <i>Stops on this Route</i>
+        <Box
+          fontSize={"40px"}
+        >
+          <i>Stops on this Route</i>
+        </Box>
+        <h6>{"* You can also hover over individual Train icons for info!"}</h6>
       </Box>
       <Box>
         {stops.map(stop => 
