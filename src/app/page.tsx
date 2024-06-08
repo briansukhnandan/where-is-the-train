@@ -80,6 +80,9 @@ export default function Home() {
           </Box>
         ) : null
       }
+      <h6 style={{ paddingTop: "50px" }}>
+        <a href="https://briansukhnandan.xyz">See more of my work!</a>
+      </h6>
     </main>
   );
 }
