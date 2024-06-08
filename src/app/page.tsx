@@ -30,11 +30,13 @@ const trainLines = [
 export default function Home() {
   const [schedules, setSchedules] = useState<SubwaySchedule>({});
   const [trainLine, setTrainLine] = useState<string>("");
+  const [refreshTimer, setRefreshTimer] = useState(60);
   const [isLoading, setIsLoading] = useState(false); 
   const [
     timeButtonWasClicked, 
     setTimeButtonWasClicked
   ] = useState(0);
+
   const getNewSchedule = (line: string) => {
     setIsLoading(true);
     onlyParseIndividualSubwayFeed(line).then(schedule => {
@@ -51,12 +53,28 @@ export default function Home() {
     }
   }, [trainLine]);
 
+  // Separate from the useEffect above, as we want this 
+  // one to run on an interval.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshTimer((r) => r-1);
+      if (refreshTimer <= 0) {
+        if (trainLine) {
+          getNewSchedule(trainLine);
+        }
+        setRefreshTimer(60);
+      }
+    }, 1_000);
+
+    return () => clearInterval(interval);
+  }, [trainLine, getNewSchedule]);
+
   return (
     <main className={styles.main}>
       <h1 style={{ paddingBottom: "30px", fontSize: "40px" }}>
         <u><b>{"Where are the NYC Subway Trains?"}</b></u>
       </h1>
-      <Box paddingBottom={"40px"}>
+      <Box paddingBottom={"40px"} textAlign={"center"}>
         <Tooltip label="This Button will be disabled after 2 clicks!">
           <Button 
             colorScheme="purple"
@@ -69,6 +87,13 @@ export default function Home() {
             Refresh Data!
           </Button>
         </Tooltip>
+        {
+          trainLine && (
+            <Box textAlign={"center"}>
+              {`Refreshing in ${refreshTimer} seconds...`}
+            </Box>
+          )
+        }
         { isLoading && <Box>{"Loading..."}</Box> }
       </Box>
       { !trainLine && (
