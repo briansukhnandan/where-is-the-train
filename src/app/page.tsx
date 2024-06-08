@@ -515,7 +515,7 @@ const TrainsEnRouteDisplay = ({
   return (
     <Tooltip label={
       <>
-        <Box>{"Status: AT_STATION"}</Box>
+        <Box>{"Status: EN_ROUTE"}</Box>
         <Box>{`Arrival Time: ${stat?.nextStop?.arrivalTime}`}</Box>
         <Box>{`Next Station: ${stat?.nextStop?.stop.name}`}</Box>
       </>
