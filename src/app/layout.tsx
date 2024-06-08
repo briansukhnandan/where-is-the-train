@@ -1,23 +1,11 @@
-"use client"
+import { Metadata } from "next";
 import "./globals.css";
-import { ChakraProvider, ThemeConfig, extendTheme } from "@chakra-ui/react";
+import { Providers } from "./providers";
 
-const config: ThemeConfig = {
-  initialColorMode: "dark",
-  useSystemColorMode: false,
-}
-
-const theme = extendTheme({
-  config,
-  styles: {
-    global: () => ({
-      body: {
-        bg: "",
-        color: "",
-      },
-    }),
-  },
-});
+export const metadata: Metadata = {
+  title: "Where are the NYC Subway Trains?",
+  description: "Track down a train by line!",
+};
 
 export default function RootLayout({
   children,
@@ -27,9 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ChakraProvider theme={theme}>
-          {children}
-        </ChakraProvider>
+        <Providers>
+          { children }
+        </Providers>
       </body>
     </html>
   );
