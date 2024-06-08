@@ -486,8 +486,14 @@ const TrainsAtStationDisplay = ({
   iconPath: string, 
   status: TripStatus 
 }) => {
+  const stat = status as EnRouteStatus;
   return (
-    <Tooltip label="Currently At Station">
+    <Tooltip label={
+      <>
+        <Box>{"Currently At Station"}</Box>
+        <Box>{`Next Station: ${stat?.nextStop?.stop.name}`}</Box>
+      </>
+    }>
       <Image 
         src={iconPath} 
         alt="Train Icon" 
@@ -509,6 +515,7 @@ const TrainsEnRouteDisplay = ({
   return (
     <Tooltip label={
       <>
+        <Box>{"Status: AT_STATION"}</Box>
         <Box>{`Arrival Time: ${stat?.nextStop?.arrivalTime}`}</Box>
         <Box>{`Next Station: ${stat?.nextStop?.stop.name}`}</Box>
       </>
