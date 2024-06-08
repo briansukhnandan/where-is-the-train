@@ -46,13 +46,20 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
+      { !trainLine && (
+        <Box fontSize={"25px"}>
+          <u>Pick a Train to get started!</u>
+        </Box>
+      ) }
       <TrainLineDisplay selectCallback={setTrainLine} />
       {
         trainLine ? (
-          <FeedDisplay 
-            trainId={trainLine} 
-            feed={schedules[trainLine]} 
-          />
+          <Box paddingTop={7}>
+            <FeedDisplay 
+              trainId={trainLine} 
+              feed={schedules[trainLine]} 
+            />
+          </Box>
         ) : null
       }
     </main>
