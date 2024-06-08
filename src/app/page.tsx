@@ -84,7 +84,7 @@ export default function Home() {
         ) : null
       }
       <h6 style={{ paddingTop: "50px" }}>
-        <a href="https://briansukhnandan.xyz">See more of my work!</a>
+        <a href="https://briansukhnandan.xyz">Click here to see more of my work!</a>
       </h6>
     </main>
   );
