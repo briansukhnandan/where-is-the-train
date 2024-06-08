@@ -1,5 +1,23 @@
+"use client"
 import "./globals.css";
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, ThemeConfig, extendTheme } from "@chakra-ui/react";
+
+const config: ThemeConfig = {
+  initialColorMode: "dark",
+  useSystemColorMode: false,
+}
+
+const theme = extendTheme({
+  config,
+  styles: {
+    global: () => ({
+      body: {
+        bg: "",
+        color: "",
+      },
+    }),
+  },
+});
 
 export default function RootLayout({
   children,
@@ -9,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ChakraProvider>
+        <ChakraProvider theme={theme}>
           {children}
         </ChakraProvider>
       </body>
