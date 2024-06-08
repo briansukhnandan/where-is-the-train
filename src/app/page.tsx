@@ -50,7 +50,7 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      <Box paddingBottom={6}>
+      <Box paddingBottom={"40px"}>
         <Tooltip label="This Button will be disabled after 2 clicks!">
           <Button 
             colorScheme="purple"
@@ -66,7 +66,7 @@ export default function Home() {
       </Box>
       { !trainLine && (
         <Box fontSize={"25px"}>
-          <u>Pick a Train to get started!</u>
+          <u><i>Pick a Train to get started!</i></u>
         </Box>
       ) }
       <TrainLineDisplay selectCallback={setTrainLine} />
