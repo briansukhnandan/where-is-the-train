@@ -95,7 +95,9 @@ export default function Home() {
           color: "#b5abac" 
         }}
       >
-        <a href="https://briansukhnandan.xyz">Click here to see more of my work!</a>
+        <a href="https://briansukhnandan.xyz">
+          Click here to see more of my work!
+        </a>
       </h6>
     </main>
   );
