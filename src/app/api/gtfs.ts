@@ -10,6 +10,7 @@ import {
   TrainStatus, 
   StopIdName
 } from "../types";
+import { TRAIN_LINE_TO_URL_MAP } from "../util";
 
 const ACE_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace";
 const BDFM_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm";
@@ -122,29 +123,10 @@ const parseGtfsFeed = async(specificEndpoint: string) => {
   return dataFromThisFeed;
 }
 
-export const parseAllSubwaySchedules = async() => {
-  const URLS_TO_ITERATE_THROUGH = [
-    ACE_GTFS_URL,
-    BDFM_GTFS_URL,
-    G_GTFS_URL,
-    JZ_GTFS_URL,
-    NQRW_GTFS_URL,
-    L_GTFS_URL,
-    IRT_GTFS_URL,
-  ];
-
-  let allSchedules: SubwaySchedule = {};
-  for (const URL of URLS_TO_ITERATE_THROUGH) {
-    const schedule = await parseGtfsFeed(URL);
-    if (schedule && Object.keys(schedule).length) {
-      allSchedules = {
-        ...allSchedules,
-        ...schedule
-      };
-    }
-  }
-
-  return allSchedules;
+export const onlyParseIndividualSubwayFeed = async(trainLine: string) => {
+  const url = TRAIN_LINE_TO_URL_MAP[trainLine];
+  const schedule = await parseGtfsFeed(url);
+  return schedule;
 }
 
 export const getActivityOfAllTrips = (feedData: FeedData): TripStatus[] => {

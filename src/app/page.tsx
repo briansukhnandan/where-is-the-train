@@ -5,7 +5,7 @@ import {
   getActivityOfAllTrips, 
   getStopListFromAllTrips, 
   getTrainsAssociatedWithStop, 
-  parseAllSubwaySchedules 
+  onlyParseIndividualSubwayFeed, 
 } from "./api/gtfs";
 import { 
   EnRouteStatus,
@@ -30,23 +30,26 @@ const trainLines = [
 export default function Home() {
   const [schedules, setSchedules] = useState<SubwaySchedule>({});
   const [trainLine, setTrainLine] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false); 
   const [
     timeButtonWasClicked, 
     setTimeButtonWasClicked
   ] = useState(0);
-  const getNewSetOfSchedules = () => {
-    parseAllSubwaySchedules().then((schedule) => {
-      setSchedules(schedule);
+  const getNewSchedule = (line: string) => {
+    setIsLoading(true);
+    onlyParseIndividualSubwayFeed(line).then(schedule => {
+      if (schedule) {
+        setSchedules(schedule);
+      }
     });
+    setIsLoading(false);
   }
 
   useEffect(() => {
-    getNewSetOfSchedules();
-  }, []);
-
-  if (!Object.keys(schedules).length) {
-    return <div>Loading...</div>
-  }
+    if (trainLine) {
+      getNewSchedule(trainLine);
+    }
+  }, [trainLine]);
 
   return (
     <main className={styles.main}>
@@ -59,13 +62,14 @@ export default function Home() {
             colorScheme="purple"
             isDisabled={!trainLine || timeButtonWasClicked >= 2}
             onClick={() => {
-              getNewSetOfSchedules();
+              getNewSchedule(trainLine);
               setTimeButtonWasClicked((v) => v + 1);
             }}
           >
             Refresh Data!
           </Button>
         </Tooltip>
+        { isLoading && <Box>{"Loading..."}</Box> }
       </Box>
       { !trainLine && (
         <Box fontSize={"25px"}>
