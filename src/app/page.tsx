@@ -50,6 +50,9 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
+      <h1 style={{ paddingBottom: "30px", fontSize: "40px" }}>
+        <u>{"Where is the Train?"}</u>
+      </h1>
       <Box paddingBottom={"40px"}>
         <Tooltip label="This Button will be disabled after 2 clicks!">
           <Button 
@@ -66,7 +69,7 @@ export default function Home() {
       </Box>
       { !trainLine && (
         <Box fontSize={"25px"}>
-          <u><i>Pick a Train to get started!</i></u>
+          <i>Pick a Train to get started!</i>
         </Box>
       ) }
       <TrainLineDisplay selectCallback={setTrainLine} />
@@ -385,9 +388,7 @@ const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => 
       <Box
         fontSize={"40px"}
       >
-        <u>
-          <i>Stops on this Route</i>
-        </u>
+        <i>Stops on this Route</i>
       </Box>
       <Box>
         {stops.map(stop => 
