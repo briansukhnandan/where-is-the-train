@@ -5,7 +5,7 @@ import {
   FeedData, 
   MtaStop, 
   _TripUpdate, 
-  TripActivity, 
+  TripStatus, 
   Trip, 
   TrainStatus, 
   StopIdName
@@ -147,9 +147,9 @@ export const parseAllSubwaySchedules = async() => {
   return allSchedules;
 }
 
-export const getActivityOfAllTrips = (feedData: FeedData): TripActivity[] => {
+export const getActivityOfAllTrips = (feedData: FeedData): TripStatus[] => {
   const trips = feedData.trips;
-  const tripActivites: TripActivity[] = [];
+  const tripActivites: TripStatus[] = [];
   for (const trip of trips) {
     const tripActivity = processTrip(trip);
     tripActivites.push(tripActivity);
@@ -157,7 +157,7 @@ export const getActivityOfAllTrips = (feedData: FeedData): TripActivity[] => {
   return tripActivites;
 }
 
-const processTrip = (trip: Trip): TripActivity => {
+const processTrip = (trip: Trip): TripStatus => {
   const currStops = trip.stops;
   if (!currStops.length) {
     return {
@@ -239,8 +239,8 @@ export const getStopListFromAllTrips = (trips: Trip[]): StopIdName[] => {
 
 export const getTrainsAssociatedWithStop = (
   stop: StopIdName, 
-  statuses: TripActivity[]
-): TripActivity[] => {
+  statuses: TripStatus[]
+): TripStatus[] => {
   /** 
    * We either look for trip activities with 
    * the status "AT_STATION", where the lastSeenStop
