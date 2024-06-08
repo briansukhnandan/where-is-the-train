@@ -17,7 +17,7 @@ import {
 } from "./types";
 import { partition } from "./util";
 import Image from 'next/image'
-import { Box, IconButton, Tooltip } from "@chakra-ui/react";
+import { Box, Button, IconButton, Tooltip } from "@chakra-ui/react";
 
 const trainLines = [
   "A", "B", "C", "D", "E",
@@ -30,6 +30,10 @@ const trainLines = [
 export default function Home() {
   const [schedules, setSchedules] = useState<SubwaySchedule>({});
   const [trainLine, setTrainLine] = useState<string>("");
+  const [
+    timeButtonWasClicked, 
+    setTimeButtonWasClicked
+  ] = useState(0);
   const getNewSetOfSchedules = () => {
     parseAllSubwaySchedules().then((schedule) => {
       setSchedules(schedule);
@@ -46,6 +50,20 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
+      <Box paddingBottom={6}>
+        <Tooltip label="This Button will be disabled after 2 clicks!">
+          <Button 
+            colorScheme="purple"
+            isDisabled={!trainLine || timeButtonWasClicked >= 2}
+            onClick={() => {
+              getNewSetOfSchedules();
+              setTimeButtonWasClicked((v) => v + 1);
+            }}
+          >
+            Refresh Data!
+          </Button>
+        </Tooltip>
+      </Box>
       { !trainLine && (
         <Box fontSize={"25px"}>
           <u>Pick a Train to get started!</u>
@@ -54,7 +72,7 @@ export default function Home() {
       <TrainLineDisplay selectCallback={setTrainLine} />
       {
         trainLine ? (
-          <Box paddingTop={7}>
+          <Box paddingTop={"50px"}>
             <FeedDisplay 
               trainId={trainLine} 
               feed={schedules[trainLine]} 
@@ -431,7 +449,13 @@ const StopDisplay = ({ trainId, stop, statuses }: {
             ))
           }
         </Box>
-        <Box style={{ fontSize: "22px" }}>
+        <Box 
+          style={{ 
+            fontSize: "22px", 
+            paddingLeft: "10px", 
+            paddingRight: "10px" 
+          }}
+        >
           { stop.name }
         </Box>
         <Box>
