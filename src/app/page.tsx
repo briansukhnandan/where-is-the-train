@@ -528,6 +528,11 @@ const TrainsEnRouteDisplay = ({
         <Box>{"Status: EN_ROUTE"}</Box>
         <Box>{`Arrival Time: ${stat?.nextStop?.arrivalTime}`}</Box>
         <Box>{`Next Station: ${stat?.nextStop?.stop.name}`}</Box>
+        {
+          stat?.lastSeenStop?.stop?.name && (
+            <Box>{`Last Seen Station: ${stat?.lastSeenStop?.stop.name}`}</Box>
+          )
+        }
       </>
     }>
       <Image 

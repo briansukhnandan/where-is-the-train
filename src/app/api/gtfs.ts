@@ -196,7 +196,6 @@ const processTrip = (trip: Trip): TripStatus => {
       departureTimeToUse && 
       (currUnixTimeSeconds <= departureTimeToUse)
     ) {
-      lastSeenStop = stop;
       return {
         tripId: trip.tripId,
         status: TrainStatus.AT_STATION,
@@ -211,6 +210,8 @@ const processTrip = (trip: Trip): TripStatus => {
         nextStop: currStops[parseInt(stopIdx) + 1]
       };
     }
+
+    lastSeenStop = stop;
   }
 
   return {
