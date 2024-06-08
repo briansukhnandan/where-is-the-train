@@ -97,7 +97,7 @@ const StopDisplay = ({ trainId, stop, statuses }: {
         <div 
           style={{ 
             fontSize: "22px", 
-            transform: "translate(0px, 3px)" 
+            transform: "translate(0px, 2px)" 
           }}
         >
           { stop.name }
