@@ -55,7 +55,12 @@ const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => 
   return (
     <Box>
       {stops.map(stop => 
-        <StopDisplay trainId={trainId} stop={stop} statuses={statuses} />
+        <StopDisplay
+          key={stop.id}
+          trainId={trainId} 
+          stop={stop} 
+          statuses={statuses} 
+        />
       )}
     </Box>
   );
@@ -89,6 +94,7 @@ const StopDisplay = ({ trainId, stop, statuses }: {
           {
             trainsAtStation.map(tripStatus => (
               <TrainsAtStationDisplay 
+                key={tripStatus.tripId}
                 status={tripStatus} 
                 iconPath={associatedIconPath} 
               />
@@ -107,6 +113,7 @@ const StopDisplay = ({ trainId, stop, statuses }: {
           { 
             trainsEnRouteToStation.map(tripStatus => (
               <TrainsEnRouteDisplay 
+                key={tripStatus.tripId}
                 status={tripStatus}
                 iconPath={associatedIconPath}
               />
