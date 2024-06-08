@@ -1,7 +1,12 @@
 import { transit_realtime as TransitRealtime } from "gtfs-realtime-bindings"
 
-type _PossiblyNullishString = string | null | undefined;
-type _PossiblyNullishNumber = number | null | undefined;
+export type PossiblyNullishString = string | null | undefined;
+export type PossiblyNullishNumber = number | null | undefined;
+
+export type StopIdName = {
+  id: PossiblyNullishString;
+  name: PossiblyNullishString;
+}
 
 export enum TrainStatus {
   EN_ROUTE,
@@ -19,17 +24,17 @@ export type MtaStop = {
 // Our own Stop datatype.
 export type Stop = {
   arrivalTime: string;
-  arrivalTimeRaw: _PossiblyNullishNumber; // Unix timestamp
+  arrivalTimeRaw: PossiblyNullishNumber; // Unix timestamp
   departureTime: string;
-  departureTimeRaw: _PossiblyNullishNumber; // Unix timestamp
+  departureTimeRaw: PossiblyNullishNumber; // Unix timestamp
   // The departure times provided by the MTA are literally 
   // equivalent to the arrival times... Instead we put a 30s 
   // addition to the arrival time which acts as a pseudo departure 
   // time for our calculations.
-  fixedDepartureTimeRaw: _PossiblyNullishNumber;
+  fixedDepartureTimeRaw: PossiblyNullishNumber;
   stop: {
-    id: _PossiblyNullishString,
-    name: _PossiblyNullishString,
+    id: PossiblyNullishString,
+    name: PossiblyNullishString,
   }
 };
 
@@ -38,7 +43,7 @@ export type TrainSymbol = string;
 export type Trip = {
   tripId: string;
   startDate: string;
-  startTime: _PossiblyNullishString;
+  startTime: PossiblyNullishString;
   stops: Stop[];
 };
 export type FeedData = {
@@ -53,6 +58,7 @@ export type TripActivity = {
 } | {
   status: TrainStatus.AT_STATION; 
   lastSeenStop: Stop;
+  nextStop?: Stop;
 } | {
   // Only available on route.
   status: TrainStatus.EN_ROUTE

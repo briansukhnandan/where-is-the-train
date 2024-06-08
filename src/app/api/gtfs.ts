@@ -1,6 +1,15 @@
 import { transit_realtime as TransitRealtime } from "gtfs-realtime-bindings"
 import stops from "./stops.json";
-import { SubwaySchedule, FeedData, MtaStop, _TripUpdate, TripActivity, Trip, TrainStatus } from "../types";
+import { 
+  SubwaySchedule, 
+  FeedData, 
+  MtaStop, 
+  _TripUpdate, 
+  TripActivity, 
+  Trip, 
+  TrainStatus, 
+  StopIdName
+} from "../types";
 
 const ACE_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace";
 const BDFM_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm";
@@ -191,7 +200,8 @@ const processTrip = (trip: Trip): TripActivity => {
       return {
         tripId: trip.tripId,
         status: TrainStatus.AT_STATION,
-        lastSeenStop
+        lastSeenStop,
+        nextStop: currStops[parseInt(stopIdx) + 1]
       }
     } else if (stop.arrivalTimeRaw && currUnixTimeSeconds < stop.arrivalTimeRaw) {
       return {
@@ -207,4 +217,47 @@ const processTrip = (trip: Trip): TripActivity => {
     tripId: trip.tripId,
     status: TrainStatus.OUT_OF_SERVICE
   };
+}
+
+export const getStopListFromAllTrips = (trips: Trip[]): StopIdName[] => {
+  const tripWithMostStops = trips.reduce((prev, curr) => {
+    if (prev?.stops?.length > curr?.stops?.length) {
+      return prev;
+    }
+    return curr;
+  }, trips[0]);
+
+  const currStops = tripWithMostStops.stops;
+  return currStops.map(stopData => {
+    const stop = stopData.stop;
+    return {
+      id: stop.id,
+      name: stop.name
+    };
+  });
+}
+
+export const getTrainsAssociatedWithStop = (
+  stop: StopIdName, 
+  statuses: TripActivity[]
+): TripActivity[] => {
+  /** 
+   * We either look for trip activities with 
+   * the status "AT_STATION", where the lastSeenStop
+   * is the stop provided to this fn, 
+   *
+   * Or we look for trip activities with the status "EN_ROUTE"
+   * where the next stop is the current stop.
+   */
+  const trainsAtStation = statuses.filter(s => 
+    s.status === TrainStatus.AT_STATION && 
+    s.lastSeenStop.stop.id === stop.id
+  );
+
+  const trainsEnRouteToStop = statuses.filter(s =>
+    s.status === TrainStatus.EN_ROUTE && 
+    s.nextStop?.stop.id === stop.id
+  );
+
+  return [...trainsAtStation, ...trainsEnRouteToStop];
 }
