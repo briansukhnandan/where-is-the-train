@@ -101,12 +101,7 @@ const StopDisplay = ({ trainId, stop, statuses }: {
             ))
           }
         </Box>
-        <Box 
-          style={{ 
-            fontSize: "22px", 
-            transform: "translate(0px, 2px)" 
-          }}
-        >
+        <Box style={{ fontSize: "22px" }}>
           { stop.name }
         </Box>
         <Box>
