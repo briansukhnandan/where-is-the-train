@@ -51,7 +51,7 @@ export type FeedData = {
 };
 export type SubwaySchedule = Record<TrainSymbol, FeedData>;
 
-export type TripActivity = {
+export type TripStatus = {
   tripId: string;
 } & ({
   status: TrainStatus.OUT_OF_SERVICE;
