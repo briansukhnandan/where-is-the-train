@@ -51,7 +51,7 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <h1 style={{ paddingBottom: "30px", fontSize: "40px" }}>
-        <u>{"Where is the Train?"}</u>
+        <u><b>{"Where are the NYC Subway Trains?"}</b></u>
       </h1>
       <Box paddingBottom={"40px"}>
         <Tooltip label="This Button will be disabled after 2 clicks!">
