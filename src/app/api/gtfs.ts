@@ -182,7 +182,7 @@ const processTrip = (trip: Trip): TripStatus => {
      * of whether a train has started its trip. The logic is as follows:
      *
      * - If the train's last seen station is a terminating stop, and 
-     *   the time until the next stop is < 2 mins, most likely the train 
+     *   the time until the next stop is < 3 mins, most likely the train 
      *   is EN_ROUTE to the next stop.
      * - Else, we assume the train is IDLING at the last stop.
      */
