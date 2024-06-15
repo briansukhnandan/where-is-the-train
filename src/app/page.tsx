@@ -8,12 +8,15 @@ import {
   onlyParseIndividualSubwayFeed, 
 } from "./api/gtfs";
 import { 
+  AtStationStatus,
   EnRouteStatus,
   FeedData, 
+  IdleStatus, 
   StopIdName, 
   SubwaySchedule, 
   TrainStatus, 
-  TripStatus 
+  TripStatus, 
+  trainStatusToString
 } from "./types";
 import { TRAIN_LINE_TO_COLOR, partition } from "./util";
 import Image from 'next/image'
@@ -459,7 +462,7 @@ const StopDisplay = ({ trainId, stop, statuses }: {
   const associatedIconPath = trainIdToImage[trainId];
   const [
     trainsAtStation, 
-    trainsEnRouteToStation
+    trainsNotAtStation
   ] = partition(
     trainsAssociatedWithStop, 
     (trip) => trip.status === TrainStatus.AT_STATION
@@ -502,8 +505,8 @@ const StopDisplay = ({ trainId, stop, statuses }: {
         </Box>
         <Box>
           { 
-            trainsEnRouteToStation.map(tripStatus => (
-              <TrainsEnRouteDisplay 
+            trainsNotAtStation.map(tripStatus => (
+              <TrainsNotAtStopDisplay 
                 key={tripStatus.tripId}
                 status={tripStatus}
                 iconPath={associatedIconPath}
@@ -524,7 +527,7 @@ const TrainsAtStationDisplay = ({
   iconPath: string, 
   status: TripStatus 
 }) => {
-  const stat = status as EnRouteStatus;
+  const stat = status as AtStationStatus;
   return (
     <Tooltip label={
       <>
@@ -546,18 +549,18 @@ const TrainsAtStationDisplay = ({
   );
 }
 
-const TrainsEnRouteDisplay = ({ 
+const TrainsNotAtStopDisplay = ({ 
   iconPath, 
   status 
 }: { 
   iconPath: string, 
   status: TripStatus 
 }) => {
-  const stat = status as EnRouteStatus;
+  const stat = status as EnRouteStatus | IdleStatus;
   return (
     <Tooltip label={
       <>
-        <Box>{"Status: EN_ROUTE"}</Box>
+        <Box>{`Status: ${trainStatusToString(stat.status)}`}</Box>
         <Box>{`Arrival Time: ${stat?.nextStop?.arrivalTime}`}</Box>
         <Box>{`Next Station: ${stat?.nextStop?.stop.name}`}</Box>
         {

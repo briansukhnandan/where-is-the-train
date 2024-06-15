@@ -8,9 +8,10 @@ import {
   TripStatus, 
   Trip, 
   TrainStatus, 
-  StopIdName
+  StopIdName,
+  TrainSymbol
 } from "../types";
-import { TRAIN_LINE_TO_URL_MAP } from "../util";
+import { TRAIN_LINE_TO_TERMINATING_STOPS, TRAIN_LINE_TO_URL_MAP } from "../util";
 
 const ACE_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace";
 const BDFM_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm";
@@ -28,7 +29,7 @@ const getStopMap = () => {
   return stopMap;
 }
 
-const parseGtfsFeed = async(specificEndpoint: string) => {
+const parseGtfsFeed = async(specificEndpoint: string, trainLine: TrainSymbol) => {
   const tripIdToUpdateMap: Record<string, _TripUpdate> = {};
   try {
     const response = await fetch(specificEndpoint);
@@ -66,6 +67,7 @@ const parseGtfsFeed = async(specificEndpoint: string) => {
 
       dataFromThisFeed[validRouteId] ??= { trips: [] };
       dataFromThisFeed[validRouteId].trips.push({
+        trainLine,
         tripId: trip.tripId as string,
         startDate: validStartDate,
         startTime: validStartTime,
@@ -125,7 +127,7 @@ const parseGtfsFeed = async(specificEndpoint: string) => {
 
 export const onlyParseIndividualSubwayFeed = async(trainLine: string) => {
   const url = TRAIN_LINE_TO_URL_MAP[trainLine];
-  const schedule = await parseGtfsFeed(url);
+  const schedule = await parseGtfsFeed(url, trainLine);
   return schedule;
 }
 
@@ -172,6 +174,45 @@ const processTrip = (trip: Trip): TripStatus => {
     const departureTimeToUse = stop.arrivalTimeRaw === stop.departureTimeRaw
       ? stop.fixedDepartureTimeRaw
       : stop.departureTimeRaw;
+    
+    const nextStop = currStops[parseInt(stopIdx) + 1];
+
+    /** 
+     * There is some hairy logic here that determines the state 
+     * of whether a train has started its trip. The logic is as follows:
+     *
+     * - If the train's last seen station is a terminating stop, and 
+     *   the time until the next stop is < 2 mins, most likely the train 
+     *   is EN_ROUTE to the next stop.
+     * - Else, we assume the train is IDLING at the last stop.
+     */
+    const SECONDS_THRESHOLD_LAST_STOP = 180;
+    if (
+      lastSeenStop?.stop?.id && 
+      TRAIN_LINE_TO_TERMINATING_STOPS[trip.trainLine].includes(
+        lastSeenStop.stop.id
+      )
+    ) {
+      if (
+        nextStop?.arrivalTimeRaw &&
+        (nextStop.arrivalTimeRaw - currUnixTimeSeconds) > 0 &&
+        (nextStop.arrivalTimeRaw - currUnixTimeSeconds) <= SECONDS_THRESHOLD_LAST_STOP
+      ) {
+        return {
+          tripId: trip.tripId,
+          status: TrainStatus.EN_ROUTE,
+          lastSeenStop,
+          nextStop: currStops[parseInt(stopIdx) + 1]
+        };
+      } else {
+        return {
+          tripId: trip.tripId,
+          status: TrainStatus.IDLING,
+          lastSeenStop,
+          nextStop: currStops[parseInt(stopIdx) + 1]
+        };
+      }
+    }
 
     if (
       stop.arrivalTimeRaw && 
@@ -241,5 +282,14 @@ export const getTrainsAssociatedWithStop = (
     s.nextStop?.stop.id === stop.id
   );
 
-  return [...trainsAtStation, ...trainsEnRouteToStop];
+  const trainIdlingAtStop = statuses.filter(s => 
+    s.status === TrainStatus.IDLING && 
+    s.lastSeenStop?.stop?.id === stop.id
+  );
+
+  return [
+    ...trainsAtStation, 
+    ...trainsEnRouteToStop,
+    ...trainIdlingAtStop
+  ];
 }

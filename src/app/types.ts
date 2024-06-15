@@ -9,10 +9,18 @@ export type StopIdName = {
 }
 
 export enum TrainStatus {
+  IDLING,
   EN_ROUTE,
   AT_STATION,
   OUT_OF_SERVICE,
 }
+
+export const trainStatusToString = (stat: TrainStatus) => ({
+  [TrainStatus.IDLING]: "IDLING",
+  [TrainStatus.EN_ROUTE]: "EN_ROUTE",
+  [TrainStatus.AT_STATION]: "AT_STATION",
+  [TrainStatus.OUT_OF_SERVICE]: "OUT_OF_SERVICE"
+})[stat];
 
 // Taken directly from the MTA.
 export type MtaStop = {
@@ -41,6 +49,7 @@ export type Stop = {
 export type _TripUpdate = TransitRealtime.ITripUpdate;
 export type TrainSymbol = string;
 export type Trip = {
+  trainLine: TrainSymbol;
   tripId: string;
   startDate: string;
   startTime: PossiblyNullishString;
@@ -62,6 +71,12 @@ export type EnRouteStatus = {
   nextStop?: Stop;
   timeUntilNextStop?: number;
 }
+export type IdleStatus = {
+  status: TrainStatus.IDLING;
+  lastSeenStop: Stop;
+  nextStop?: Stop;
+  timeUntilNextStop?: number;
+}
 export type TripStatus = {
   tripId: string;
 } & ({
@@ -69,4 +84,5 @@ export type TripStatus = {
 } 
   | AtStationStatus 
   | EnRouteStatus
+  | IdleStatus
 );
