@@ -30,11 +30,49 @@ const trainLines = [
   "4", "5", "6", "7"
 ];
 
+const RefreshButton = ({
+  action, 
+  timeIntervalSeconds,
+  disableCriteria,
+}: {
+  action: () => any, 
+  timeIntervalSeconds: number,
+  disableCriteria?: boolean,
+}) => {
+  const [refreshTimer, setRefreshTimer] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (refreshTimer > 0) {
+        setRefreshTimer((r) => r-1);
+      }
+    }, 1_000);
+
+    return () => clearInterval(interval);
+  }, [refreshTimer, setRefreshTimer]);
+
+  return (
+    <Button
+      colorScheme="purple"
+      isDisabled={disableCriteria || refreshTimer > 0}
+      onClick={() => {
+        action();
+        setRefreshTimer(timeIntervalSeconds);
+      }}
+    >
+      { 
+        refreshTimer > 0 
+          ? `Refresh available in ${refreshTimer} seconds!` 
+          : "Refresh Data!" 
+      }
+    </Button>
+  );
+}
+
 export default function Home() {
   const [schedules, setSchedules] = useState<SubwaySchedule>({});
-  const [trainLine, setTrainLine] = useState<string>("");
+  const [selectedTrainLine, setTrainLine] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false); 
-  const [refreshTimer, setRefreshTimer] = useState(0);
 
   const getNewSchedule = (line: string) => {
     setIsLoading(true);
@@ -47,22 +85,10 @@ export default function Home() {
   }
 
   useEffect(() => {
-    if (trainLine) {
-      getNewSchedule(trainLine);
+    if (selectedTrainLine) {
+      getNewSchedule(selectedTrainLine);
     }
-  }, [trainLine]);
-
-  // Separate from the useEffect above, as we want this 
-  // one to run on an interval.
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (refreshTimer > 0) {
-        setRefreshTimer((r) => r-1);
-      }
-    }, 1_000);
-
-    return () => clearInterval(interval);
-  }, [refreshTimer, setRefreshTimer]);
+  }, [selectedTrainLine]);
 
   return (
     <main className={styles.main}>
@@ -70,36 +96,25 @@ export default function Home() {
         <u><b>{"Where are the NYC Subway Trains?"}</b></u>
       </h1>
       <Box paddingBottom={"40px"} textAlign={"center"}>
-        <Tooltip label="This button has a 1 minute cooldown once clicked!">
-          <Button 
-            colorScheme="purple"
-            isDisabled={!trainLine || refreshTimer > 0}
-            onClick={() => {
-              getNewSchedule(trainLine);
-              setRefreshTimer(60);
-            }}
-          >
-            { 
-              refreshTimer > 0 
-                ? `Refresh available in ${refreshTimer} seconds!` 
-                : "Refresh Data!" 
-            }
-          </Button>
-        </Tooltip>
+        <RefreshButton 
+          action={() => getNewSchedule(selectedTrainLine)} 
+          disableCriteria={!selectedTrainLine}
+          timeIntervalSeconds={60}
+        />
         { isLoading && <Box>{"Loading..."}</Box> }
       </Box>
-      { !trainLine && (
+      { !selectedTrainLine && (
         <Box fontSize={"25px"}>
           <i>Pick a Train to get started!</i>
         </Box>
       )}
       <TrainLineDisplay selectCallback={setTrainLine} />
       {
-        (trainLine && !isLoading) ? (
+        (selectedTrainLine && !isLoading) ? (
           <Box paddingTop={"50px"}>
             <FeedDisplay 
-              trainId={trainLine} 
-              feed={schedules[trainLine]} 
+              trainId={selectedTrainLine} 
+              feed={schedules[selectedTrainLine]} 
             />
           </Box>
         ) : null

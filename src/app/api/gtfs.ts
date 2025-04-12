@@ -13,14 +13,6 @@ import {
 } from "../types";
 import { TRAIN_LINE_TO_TERMINATING_STOPS, TRAIN_LINE_TO_URL_MAP } from "../util";
 
-const ACE_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace";
-const BDFM_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm";
-const G_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g";
-const JZ_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-jz";
-const NQRW_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw";
-const L_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l";
-const IRT_GTFS_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs";
-
 const getStopMap = () => {
   const stopMap: Record<string, MtaStop> = {};
   for (const stop of stops) {
@@ -51,7 +43,6 @@ const parseGtfsFeed = async(specificEndpoint: string, trainLine: TrainSymbol) =>
     });
   } catch (error) {
     console.log(error);
-    process.exit(1);
   }
 
   const dataFromThisFeed: SubwaySchedule = {};
@@ -133,12 +124,7 @@ export const onlyParseIndividualSubwayFeed = async(trainLine: string) => {
 
 export const getActivityOfAllTrips = (feedData: FeedData): TripStatus[] => {
   const trips = feedData.trips;
-  const tripActivites: TripStatus[] = [];
-  for (const trip of trips) {
-    const tripActivity = processTrip(trip);
-    tripActivites.push(tripActivity);
-  }
-  return tripActivites;
+  return trips.map(processTrip);
 }
 
 const processTrip = (trip: Trip): TripStatus => {
@@ -165,15 +151,20 @@ const processTrip = (trip: Trip): TripStatus => {
    *        it has past this station.
    */
   const currUnixTimeSeconds = parseInt(`${Date.now() / 1000}`);
+  const THREE_MINUTES_SECONDS = 180;
+  const FIVE_MINUTES_SECONDS = 300;
+  const TWELVE_MINUTES_IN_SECONDS = THREE_MINUTES_SECONDS * 4;
+  const FIFTEEN_MINUTES_IN_SECONDS = THREE_MINUTES_SECONDS * 5;
+
   let lastSeenStop = currStops[0];
   for (const stopIdx in currStops) {
-    const stop = currStops[stopIdx];
-    lastSeenStop = stop;
+    const currentStop = currStops[stopIdx];
+    lastSeenStop = currentStop;
     // If the arrival/departure times taken from the MTA are the same val,
     // we use the fixedDepartureTimeRaw.
-    const departureTimeToUse = stop.arrivalTimeRaw === stop.departureTimeRaw
-      ? stop.fixedDepartureTimeRaw
-      : stop.departureTimeRaw;
+    const departureTimeToUse = currentStop.arrivalTimeRaw === currentStop.departureTimeRaw
+      ? currentStop.fixedDepartureTimeRaw
+      : currentStop.departureTimeRaw;
     
     const nextStop = currStops[parseInt(stopIdx) + 1];
 
@@ -186,17 +177,23 @@ const processTrip = (trip: Trip): TripStatus => {
      *   is EN_ROUTE to the next stop.
      * - Else, we assume the train is IDLING at the last stop.
      */
-    const SECONDS_THRESHOLD_LAST_STOP = 180;
+
+    /** 
+     * This block handles trains that are at or are just leaving
+     * their last stops.
+     */
     if (
       lastSeenStop?.stop?.id && 
       TRAIN_LINE_TO_TERMINATING_STOPS[trip.trainLine].includes(
         lastSeenStop.stop.id
       )
     ) {
+      // We use a 5-minute threshold to determinw whether or
+      // not the train is headed to the next station.
       if (
         nextStop?.arrivalTimeRaw &&
         (nextStop.arrivalTimeRaw - currUnixTimeSeconds) > 0 &&
-        (nextStop.arrivalTimeRaw - currUnixTimeSeconds) <= SECONDS_THRESHOLD_LAST_STOP
+        (nextStop.arrivalTimeRaw - currUnixTimeSeconds) <= FIVE_MINUTES_SECONDS
       ) {
         return {
           tripId: trip.tripId,
@@ -204,6 +201,17 @@ const processTrip = (trip: Trip): TripStatus => {
           lastSeenStop,
           nextStop: currStops[parseInt(stopIdx) + 1]
         };
+      } else if (
+        // They also like to just give all data up front, so 
+        // we filter out trips where the next stop is some outrageous
+        // time in the future.
+        nextStop?.arrivalTimeRaw && 
+        nextStop.arrivalTimeRaw - currUnixTimeSeconds >= TWELVE_MINUTES_IN_SECONDS
+      ) {
+        return {
+          tripId: trip.tripId,
+          status: TrainStatus.OUT_OF_SERVICE
+        }
       } else {
         return {
           tripId: trip.tripId,
@@ -215,8 +223,8 @@ const processTrip = (trip: Trip): TripStatus => {
     }
 
     if (
-      stop.arrivalTimeRaw && 
-      (currUnixTimeSeconds >= stop.arrivalTimeRaw) && 
+      currentStop.arrivalTimeRaw && 
+      (currUnixTimeSeconds >= currentStop.arrivalTimeRaw) && 
       departureTimeToUse && 
       (currUnixTimeSeconds <= departureTimeToUse)
     ) {
@@ -226,7 +234,16 @@ const processTrip = (trip: Trip): TripStatus => {
         lastSeenStop,
         nextStop: currStops[parseInt(stopIdx) + 1]
       }
-    } else if (stop.arrivalTimeRaw && currUnixTimeSeconds < stop.arrivalTimeRaw) {
+    } else if (
+      currentStop.arrivalTimeRaw && 
+      currUnixTimeSeconds < currentStop.arrivalTimeRaw &&
+      /** 
+       * To my knowledge there aren't any stop gaps that are more than
+       * 15 minutes. The longest seems to me 59th st -> 125th st at around
+       * 8 minutes.
+       */
+      currentStop.arrivalTimeRaw - currUnixTimeSeconds < FIFTEEN_MINUTES_IN_SECONDS
+    ) {
       return {
         tripId: trip.tripId,
         status: TrainStatus.EN_ROUTE,
