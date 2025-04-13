@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useMemo, useState } from "react";
+import { CSSProperties, useEffect, useMemo, useState } from "react";
 import styles from "./page.module.css";
 import { 
   getActivityOfAllTrips, 
@@ -16,7 +16,7 @@ import {
 } from "./types";
 import { TRAIN_LINE_TO_COLOR, getGeneralStopId } from "./util";
 import Image from 'next/image'
-import { Box, Button, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Button, Grid, GridItem, Text, Tooltip } from "@chakra-ui/react";
 
 const trainLines = [
   "A", "B", "C", "D", "E",
@@ -25,6 +25,8 @@ const trainLines = [
   "W", "Z", "1", "2", "3",
   "4", "5", "6", "7"
 ];
+
+const MAX_WIDTH_PX_FOR_STOP_DISPLAY = 900;
 
 const RefreshButton = ({
   action, 
@@ -550,16 +552,11 @@ const StopDisplay = ({ trainId, stop, statuses, allStops }: {
         textAlign: "center", 
         paddingTop: 6,
         paddingBottom: 6,
+        maxWidth: `${MAX_WIDTH_PX_FOR_STOP_DISPLAY}px`
       }}
     >
-      <Box 
-        style={{ 
-          display: "flex", 
-          flexDirection: "row", 
-          alignItems: "center",
-          justifyContent: "center"
-        }}>
-        <Box>
+      <Grid templateColumns="repeat(3, 1fr)">
+        <GridItem paddingTop={"2px"}>
           {
             trainsPointingDown.map(tripStatus => (
               <TrainDisplayBase
@@ -567,20 +564,21 @@ const StopDisplay = ({ trainId, stop, statuses, allStops }: {
                 status={tripStatus} 
                 iconPath={associatedIconPath} 
                 iconPosition="LEFT"
+                extraSx={{ justifyContent: "right" }}
               />
             ))
           }
-        </Box>
-        <Box 
+        </GridItem>
+        <GridItem
           style={{ 
             fontSize: "22px", 
             paddingLeft: "10px", 
             paddingRight: "10px" 
           }}
         >
-          { stop.name }
-        </Box>
-        <Box>
+          { stop.name ?? `Stop (${stop.id})` }
+        </GridItem>
+        <GridItem>
           { 
             [...trainsPointingUp, ...trainsWithNoDirection].map(tripStatus => (
               <TrainDisplayBase
@@ -591,8 +589,8 @@ const StopDisplay = ({ trainId, stop, statuses, allStops }: {
               />
             )) 
           }
-        </Box>
-      </Box>
+        </GridItem>
+      </Grid>
     </Box>
   );
 }
@@ -612,11 +610,13 @@ const directionToIcon = {
 const TrainDisplayBase = ({ 
   iconPath, 
   status,
-  iconPosition
+  iconPosition,
+  extraSx,
 }: { 
   iconPath: string, 
   status: TripStatus,
-  iconPosition: "LEFT" | "RIGHT"
+  iconPosition: "LEFT" | "RIGHT",
+  extraSx?: CSSProperties,
 }) => {
   return (
     <Tooltip label={
@@ -634,7 +634,7 @@ const TrainDisplayBase = ({
         }
       </>
     }>
-      <Box sx={{ display: "flex" }}>
+      <Box sx={{ display: "flex", ...(extraSx ?? {}) }}>
         { 
           iconPosition === "LEFT" && (
           <>
