@@ -16,7 +16,7 @@ import {
 } from "./types";
 import { TRAIN_LINE_TO_COLOR, getGeneralStopId } from "./util";
 import Image from 'next/image'
-import { Box, Button, Tooltip } from "@chakra-ui/react";
+import { Box, Button, Text, Tooltip } from "@chakra-ui/react";
 
 const trainLines = [
   "A", "B", "C", "D", "E",
@@ -637,9 +637,18 @@ const TrainDisplayBase = ({
       <Box sx={{ display: "flex" }}>
         { 
           iconPosition === "LEFT" && (
-          <Box sx={{ paddingTop: "4px" }}>
-            {status.direction ? directionToIcon[status.direction] : "-"}
-          </Box>
+          <>
+            {
+              "nextStop" in status && status.nextStop?.arrivalTime && (
+                <Box sx={{ paddingTop: "10px" }}>
+                  <Text fontSize="xx-small">@ { status.nextStop.arrivalTime }</Text>
+                </Box>
+              )
+            }
+            <Box sx={{ paddingTop: "4px", paddingLeft: "5px", paddingRight: "5px" }}>
+              {status.direction ? directionToIcon[status.direction] : "-"}
+            </Box>
+          </>
         )}
         <Image 
           src={iconPath} 
@@ -649,9 +658,18 @@ const TrainDisplayBase = ({
         />
         { 
           iconPosition === "RIGHT" && (
-          <Box sx={{ paddingTop: "4px" }}>
-            {status.direction ? directionToIcon[status.direction] : "-"}
-          </Box>
+          <>
+            <Box sx={{ paddingTop: "4px", paddingRight: "5px", paddingLeft: "5px" }}>
+              {status.direction ? directionToIcon[status.direction] : "-"}
+            </Box>
+            {
+              "nextStop" in status && status.nextStop?.arrivalTime && (
+                <Box sx={{ paddingTop: "10px" }}>
+                  <Text fontSize="xx-small">@ { status.nextStop.arrivalTime }</Text>
+                </Box>
+              )
+            }
+          </>
         )}
       </Box>
     </Tooltip>
