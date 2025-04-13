@@ -2,6 +2,7 @@ import { transit_realtime as TransitRealtime } from "gtfs-realtime-bindings"
 
 export type MaybeNullishString = string | null | undefined;
 export type MaybeNullishNumber = number | null | undefined;
+export type Nullable<T> = T | null;
 
 export type StopIdName = {
   id: MaybeNullishString;

@@ -222,6 +222,12 @@ const processTrip = (trip: Trip): TripStatus => {
       }
     }
 
+    /** 
+     * This block is used to determine whether or not
+     * we are at a station, which is calculated by
+     * seeing if the curr time is after the arrival time
+     * but less than the departure time of a station.
+     */
     if (
       currentStop.arrivalTimeRaw && 
       (currUnixTimeSeconds >= currentStop.arrivalTimeRaw) && 
@@ -235,6 +241,10 @@ const processTrip = (trip: Trip): TripStatus => {
         nextStop: currStops[parseInt(stopIdx) + 1]
       }
     } else if (
+      /** 
+       * And lastly this block here is used to calculate
+       * whether or not the train is in transit.
+       */
       currentStop.arrivalTimeRaw && 
       currUnixTimeSeconds < currentStop.arrivalTimeRaw &&
       /** 
