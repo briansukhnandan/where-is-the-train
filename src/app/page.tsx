@@ -26,8 +26,6 @@ const trainLines = [
   "4", "5", "6", "7"
 ];
 
-const MAX_WIDTH_PX_FOR_STOP_DISPLAY = 900;
-
 const RefreshButton = ({
   action, 
   timeIntervalSeconds,
@@ -552,7 +550,6 @@ const StopDisplay = ({ trainId, stop, statuses, allStops }: {
         textAlign: "center", 
         paddingTop: 6,
         paddingBottom: 6,
-        maxWidth: `${MAX_WIDTH_PX_FOR_STOP_DISPLAY}px`
       }}
     >
       <Grid templateColumns="repeat(3, 1fr)">
@@ -571,7 +568,7 @@ const StopDisplay = ({ trainId, stop, statuses, allStops }: {
         </GridItem>
         <GridItem
           style={{ 
-            fontSize: "22px", 
+            fontSize: "20px", 
             paddingLeft: "10px", 
             paddingRight: "10px" 
           }}
