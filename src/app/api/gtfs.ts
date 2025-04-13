@@ -11,7 +11,11 @@ import {
   StopIdName,
   TrainSymbol
 } from "../types";
-import { TRAIN_LINE_TO_TERMINATING_STOPS, TRAIN_LINE_TO_URL_MAP } from "../util";
+import {
+  TRAIN_LINE_TO_TERMINATING_STOPS,
+  TRAIN_LINE_TO_URL_MAP,
+  getGeneralStopId
+} from "../util";
 
 const getStopMap = () => {
   const stopMap: Record<string, MtaStop> = {};
@@ -188,7 +192,7 @@ const processTrip = (trip: Trip): TripStatus => {
         lastSeenStop.stop.id
       )
     ) {
-      // We use a 5-minute threshold to determinw whether or
+      // We use a 5-minute threshold to determine whether or
       // not the train is headed to the next station.
       if (
         nextStop?.arrivalTimeRaw &&
@@ -298,20 +302,26 @@ export const getTrainsAssociatedWithStop = (
    *
    * Or we look for trip activities with the status "EN_ROUTE"
    * where the next stop is the current stop.
+   *
+   * Noting that we also use the stop name for comparisons,
+   * as this is more reliable than the stop codes.
    */
   const trainsAtStation = statuses.filter(s => 
     s.status === TrainStatus.AT_STATION && 
-    s.lastSeenStop.stop.id === stop.id
+    s.lastSeenStop.stop?.id && stop.id && 
+    (new RegExp(getGeneralStopId(s.lastSeenStop.stop.id), "i").test(stop.id))
   );
 
   const trainsEnRouteToStop = statuses.filter(s =>
     s.status === TrainStatus.EN_ROUTE && 
-    s.nextStop?.stop.id === stop.id
+    s.nextStop?.stop?.id && stop.id &&
+    (new RegExp(getGeneralStopId(s.nextStop.stop.id), "i").test(stop.id))
   );
 
   const trainIdlingAtStop = statuses.filter(s => 
     s.status === TrainStatus.IDLING && 
-    s.lastSeenStop?.stop?.id === stop.id
+    s.lastSeenStop?.stop?.id && stop.id &&
+    (new RegExp(getGeneralStopId(s.lastSeenStop.stop.id), "i").test(stop.id))
   );
 
   return [

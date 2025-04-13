@@ -80,6 +80,7 @@ export type IdleStatus = {
 }
 export type TripStatus = {
   tripId: string;
+  direction?: "UP" | "DOWN";
 } & ({
   status: TrainStatus.OUT_OF_SERVICE;
 } 

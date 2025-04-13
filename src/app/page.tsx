@@ -8,17 +8,13 @@ import {
   onlyParseIndividualSubwayFeed, 
 } from "./api/gtfs";
 import { 
-  AtStationStatus,
-  EnRouteStatus,
   FeedData, 
-  IdleStatus, 
   StopIdName, 
   SubwaySchedule, 
   TrainStatus, 
   TripStatus, 
-  trainStatusToString
 } from "./types";
-import { TRAIN_LINE_TO_COLOR, partition } from "./util";
+import { TRAIN_LINE_TO_COLOR, getGeneralStopId } from "./util";
 import Image from 'next/image'
 import { Box, Button, Tooltip } from "@chakra-ui/react";
 
@@ -452,6 +448,7 @@ const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => 
               trainId={trainId} 
               stop={stop} 
               statuses={statuses} 
+              allStops={stops}
             />
           )}
         </Box>
@@ -460,10 +457,12 @@ const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => 
   );
 }
 
-const StopDisplay = ({ trainId, stop, statuses }: {
+const StopDisplay = ({ trainId, stop, statuses, allStops }: {
   trainId: string,
   stop: StopIdName,
-  statuses: TripStatus[]
+  statuses: TripStatus[],
+  /** Refers to stops on this line */
+  allStops: StopIdName[],
 }) => {
   const trainIdToImage: Record<string, string> = useMemo(() => {
     const mapping: Record<string, string> = {};
@@ -473,15 +472,77 @@ const StopDisplay = ({ trainId, stop, statuses }: {
     return mapping;
   }, [trainLines]);
 
-  const trainsAssociatedWithStop = getTrainsAssociatedWithStop(stop, statuses);
-  const associatedIconPath = trainIdToImage[trainId];
-  const [
-    trainsAtStation, 
-    trainsNotAtStation
-  ] = partition(
-    trainsAssociatedWithStop, 
-    (trip) => trip.status === TrainStatus.AT_STATION
+  const trainsAssociatedWithStop = useMemo(
+    () => getTrainsAssociatedWithStop(stop, statuses), 
+    [stop, statuses]
   );
+
+  const associatedIconPath = trainIdToImage[trainId];
+  const {
+    trainsPointingUp,
+    trainsPointingDown,
+    trainsWithNoDirection
+  } = useMemo(() => {
+    const trainsPointingUp: TripStatus[] = [];
+    const trainsPointingDown: TripStatus[] = [];
+    const trainsWithNoDirection: TripStatus[] = [];
+    const stopsIndexed = allStops.map((s, idx) => ({ ...s, idx }));
+
+    for (const train of trainsAssociatedWithStop) {
+      if (
+        !("nextStop" in train && "lastSeenStop" in train) || 
+        (train.nextStop?.stop?.id === null || train.nextStop?.stop?.id === undefined) || 
+        (train.lastSeenStop?.stop?.id === null || train.nextStop?.stop?.id === undefined)
+      ) {
+        trainsWithNoDirection.push(train);
+        continue;
+      }
+      
+      const lastSeenStopId = train.lastSeenStop?.stop?.id
+        ? getGeneralStopId(train.lastSeenStop.stop.id)
+        : null;
+      const nextStopId = train.nextStop?.stop?.id
+        ? getGeneralStopId(train.nextStop.stop.id)
+        : null;
+
+      const idxOfLastSeenStop = stopsIndexed.find(stop => 
+        stop.id && lastSeenStopId && new RegExp(getGeneralStopId(stop.id)).test(lastSeenStopId)
+      )?.idx;
+      const idxOfNextStop = stopsIndexed.find(stop => 
+        stop.id && nextStopId && new RegExp(getGeneralStopId(stop.id), "i").test(nextStopId)
+      )?.idx;
+      if (
+        idxOfLastSeenStop === null || 
+        idxOfLastSeenStop === undefined || 
+        idxOfNextStop === null || 
+        idxOfNextStop === undefined
+      ) {
+        trainsWithNoDirection.push(train);
+        continue;
+      }
+
+      if (idxOfLastSeenStop < idxOfNextStop) {
+        trainsPointingDown.push({
+          ...train,
+          direction: "DOWN",
+        });
+        continue;
+      } else if (idxOfLastSeenStop > idxOfNextStop) {
+        trainsPointingUp.push({
+          ...train,
+          direction: "UP",
+        });
+        continue;
+      }
+
+      trainsWithNoDirection.push(train);
+    }
+    return {
+      trainsPointingUp,
+      trainsPointingDown,
+      trainsWithNoDirection,
+    }
+  }, [allStops, trainsAssociatedWithStop]);
 
   return (
     <Box
@@ -500,11 +561,12 @@ const StopDisplay = ({ trainId, stop, statuses }: {
         }}>
         <Box>
           {
-            trainsAtStation.map(tripStatus => (
-              <TrainsAtStationDisplay 
+            trainsPointingDown.map(tripStatus => (
+              <TrainDisplayBase
                 key={tripStatus.tripId}
                 status={tripStatus} 
                 iconPath={associatedIconPath} 
+                iconPosition="LEFT"
               />
             ))
           }
@@ -520,11 +582,12 @@ const StopDisplay = ({ trainId, stop, statuses }: {
         </Box>
         <Box>
           { 
-            trainsNotAtStation.map(tripStatus => (
-              <TrainsNotAtStopDisplay 
+            [...trainsPointingUp, ...trainsWithNoDirection].map(tripStatus => (
+              <TrainDisplayBase
                 key={tripStatus.tripId}
-                status={tripStatus}
-                iconPath={associatedIconPath}
+                status={tripStatus} 
+                iconPath={associatedIconPath} 
+                iconPosition="RIGHT"
               />
             )) 
           }
@@ -534,63 +597,63 @@ const StopDisplay = ({ trainId, stop, statuses }: {
   );
 }
 
+const getStatusDisplay = ({
+  [TrainStatus.AT_STATION]: "Currently At Station",
+  [TrainStatus.OUT_OF_SERVICE]: "Out of Service",
+  [TrainStatus.IDLING]: "Train Idling",
+  [TrainStatus.EN_ROUTE]: "On the way",
+});
 const TRAIN_ICON_DISPLAY_SIZE = 32;
-const TrainsAtStationDisplay = ({ 
-  iconPath, 
-  status 
-}: { 
-  iconPath: string, 
-  status: TripStatus 
-}) => {
-  const stat = status as AtStationStatus;
-  return (
-    <Tooltip label={
-      <>
-        <Box>{"Currently At Station"}</Box>
-        {
-          stat?.nextStop?.stop?.name && (
-            <Box>{`Next Station: ${stat?.nextStop?.stop.name}`}</Box>
-          )
-        }
-      </>
-    }>
-      <Image 
-        src={iconPath} 
-        alt="Train Icon" 
-        width={TRAIN_ICON_DISPLAY_SIZE} 
-        height={TRAIN_ICON_DISPLAY_SIZE} 
-      />
-    </Tooltip>
-  );
-}
+const directionToIcon = {
+  "DOWN": "↓",
+  "UP": "↑"
+};
 
-const TrainsNotAtStopDisplay = ({ 
+const TrainDisplayBase = ({ 
   iconPath, 
-  status 
+  status,
+  iconPosition
 }: { 
   iconPath: string, 
-  status: TripStatus 
+  status: TripStatus,
+  iconPosition: "LEFT" | "RIGHT"
 }) => {
-  const stat = status as EnRouteStatus | IdleStatus;
   return (
     <Tooltip label={
       <>
-        <Box>{`Status: ${trainStatusToString(stat.status)}`}</Box>
-        <Box>{`Arrival Time: ${stat?.nextStop?.arrivalTime}`}</Box>
-        <Box>{`Next Station: ${stat?.nextStop?.stop.name}`}</Box>
+        <Box>{getStatusDisplay[status.status]}</Box>
         {
-          stat?.lastSeenStop?.stop?.name && (
-            <Box>{`Last Seen Station: ${stat?.lastSeenStop?.stop.name}`}</Box>
+          "lastSeenStop" in status && status?.lastSeenStop?.stop?.name && (
+            <Box>{`Last Seen Station: ${status?.lastSeenStop?.stop.name}`}</Box>
+          )
+        }
+        {
+          "nextStop" in status && status?.nextStop?.stop?.name && (
+            <Box>{`Next Station: ${status.nextStop.stop.name}`}</Box>
           )
         }
       </>
     }>
-      <Image 
-        src={iconPath} 
-        alt="Train Icon" 
-        width={TRAIN_ICON_DISPLAY_SIZE} 
-        height={TRAIN_ICON_DISPLAY_SIZE} 
-      />
+      <Box sx={{ display: "flex" }}>
+        { 
+          iconPosition === "LEFT" && (
+          <Box sx={{ paddingTop: "4px" }}>
+            {status.direction ? directionToIcon[status.direction] : "-"}
+          </Box>
+        )}
+        <Image 
+          src={iconPath} 
+          alt="Train Icon" 
+          width={TRAIN_ICON_DISPLAY_SIZE} 
+          height={TRAIN_ICON_DISPLAY_SIZE} 
+        />
+        { 
+          iconPosition === "RIGHT" && (
+          <Box sx={{ paddingTop: "4px" }}>
+            {status.direction ? directionToIcon[status.direction] : "-"}
+          </Box>
+        )}
+      </Box>
     </Tooltip>
   );
 }

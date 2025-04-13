@@ -1,20 +1,3 @@
-/** 
- * Takes in a list of elements and divides them into 
- * 2 sub-lists where one list passes a condition and the
- * other doesn't.
- */
-export const partition = <T>(elems: T[], condition: (elem: T) => boolean) => {
-  const validElems: T[] = [];
-  const invalidElems: T[] = [];
-  for (const elem of elems) {
-    const listToPushTo = condition(elem)
-      ? validElems
-      : invalidElems;
-    listToPushTo.push(elem);
-  }
-  return [validElems, invalidElems];
-}
-
 export const TRAIN_LINE_TO_URL_MAP: Record<string, string> = {
   /** 8th Ave */
   A: "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace",
@@ -279,4 +262,10 @@ export const TRAIN_LINE_TO_TERMINATING_STOPS: Record<string, string[]> = {
     "726N",
     "726S",
   ],
+}
+
+
+// Strips out N/S from the stop code
+export const getGeneralStopId = (fullStopId: string) => {
+  return fullStopId.slice(0, 3);
 }
