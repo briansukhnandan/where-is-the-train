@@ -122,14 +122,6 @@ export default function Home() {
       >
         <b>{"Where are the NYC Subway Trains?"}</b>
       </h1>
-      <Box paddingBottom={5} textAlign={"center"}>
-        <RefreshButton 
-          action={() => getNewSchedule(selectedTrainLine)} 
-          disableCriteria={!selectedTrainLine}
-          timeIntervalSeconds={60}
-        />
-        { isLoading && <Box>{"Loading..."}</Box> }
-      </Box>
       { !selectedTrainLine && (
         <Center>
           <Box fontSize={"25px"}>
@@ -138,7 +130,15 @@ export default function Home() {
         </Center>
       )}
       <TrainLineDisplay selectCallback={setTrainLine} />
-      <Box paddingTop={10}>
+      <Box paddingBottom={1} paddingTop={8} textAlign={"center"}>
+        <RefreshButton 
+          action={() => getNewSchedule(selectedTrainLine)} 
+          disableCriteria={!selectedTrainLine}
+          timeIntervalSeconds={60}
+        />
+        { isLoading && <Box>{"Loading..."}</Box> }
+      </Box>
+      <Box paddingTop={3}>
         {
           (selectedTrainLine && !isLoading) ? (
             <Box paddingBottom={10}>
