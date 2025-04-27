@@ -489,8 +489,8 @@ const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => 
         paddingBottom={5}
         textAlign={"center"}
       >
-        <Box fontSize={35}>
-          <i>Stops on this Route</i>
+        <Box fontSize={32}>
+          <b>Stops on this Route</b>
         </Box>
       </Box>
       <Box>
