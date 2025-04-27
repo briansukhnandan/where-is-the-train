@@ -28,7 +28,8 @@ import {
   Text,
   Tooltip,
   Divider,
-  Center
+  Center,
+  Flex
 } from "@chakra-ui/react";
 
 const trainLines = [
@@ -101,17 +102,28 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      <h6 
-        style={{ 
-          fontSize: "12px", 
-          color: "#b5abac",
-          textAlign: "right",
-        }}
-      >
-        <a href="https://briansukhnandan.xyz">
-          Tap here to see more of my work!
-        </a>
-      </h6>
+      <Flex justifyContent={"center"} gap={10}>
+        <h6 
+          style={{ 
+            fontSize: "12px", 
+            color: "#b5abac",
+          }}
+        >
+          <a href="https://briansukhnandan.xyz">
+            See more of my work!
+          </a>
+        </h6>
+        <h6 
+          style={{ 
+            fontSize: "12px", 
+            color: "#b5abac",
+          }}
+        >
+          <a href="https://github.com/briansukhnandan/where-is-the-train">
+            Check out the code!
+          </a>
+        </h6>
+      </Flex>
       <h1
         style={{
           paddingBottom: 10,
