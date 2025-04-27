@@ -83,9 +83,9 @@ export const TRAIN_LINE_TO_COLOR: Record<string, string> = {
 
 /** Slightly darker versions of the colors above */
 export const TRAIN_LINE_TO_DIVIDER_COLOR: Record<string, string> = {
-  A: "#05129d",
-  C: "#05129d",
-  E: "#05129d",
+  A: "#081df7",
+  C: "#081df7",
+  E: "#081df7",
 
   B: "#a56305",
   D: "#a56305",

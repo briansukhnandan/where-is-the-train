@@ -109,7 +109,7 @@ export default function Home() {
           textAlign: "center"
         }}
       >
-        <u><b>{"Where are the NYC Subway Trains?"}</b></u>
+        <b>{"Where are the NYC Subway Trains?"}</b>
       </h1>
       <Box paddingBottom={"40px"} textAlign={"center"}>
         <RefreshButton 
