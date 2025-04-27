@@ -81,6 +81,41 @@ export const TRAIN_LINE_TO_COLOR: Record<string, string> = {
   7: "#ff00df",
 }
 
+/** Slightly darker versions of the colors above */
+export const TRAIN_LINE_TO_DIVIDER_COLOR: Record<string, string> = {
+  A: "#05129d",
+  C: "#05129d",
+  E: "#05129d",
+
+  B: "#a56305",
+  D: "#a56305",
+  F: "#a56305",
+  M: "#a56305",
+
+  G: "#73a900",
+
+  N: "#96a100",
+  Q: "#96a100",
+  R: "#96a100",
+  W: "#96a100",
+
+  J: "#704901",
+  Z: "#704901",
+
+  L: "#b3b3b3",
+  S: "#b3b3b3",
+
+  1: "#9e0200",
+  2: "#9e0200",
+  3: "#9e0200",
+
+  4: "#00680c",
+  5: "#00680c",
+  6: "#00680c",
+
+  7: "#8d007b",
+}
+
 export const TRAIN_LINE_TO_TERMINATING_STOPS: Record<string, string[]> = {
   A: [
     "H11", // Far Rockaway

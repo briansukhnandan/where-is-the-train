@@ -14,7 +14,11 @@ import {
   TrainStatus, 
   TripStatus, 
 } from "./types";
-import { TRAIN_LINE_TO_COLOR, getGeneralStopId } from "./util";
+import {
+  TRAIN_LINE_TO_COLOR,
+  TRAIN_LINE_TO_DIVIDER_COLOR,
+  getGeneralStopId
+} from "./util";
 import Image from 'next/image'
 import {
   Box,
@@ -471,6 +475,7 @@ const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => 
               width={"50%"} 
               paddingTop={0.5}
               paddingBottom={2.25}
+              borderColor={TRAIN_LINE_TO_DIVIDER_COLOR[trainId] ?? undefined}
             />
           </Center>
           </>
