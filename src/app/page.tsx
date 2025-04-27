@@ -101,6 +101,17 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
+      <h6 
+        style={{ 
+          fontSize: "12px", 
+          color: "#b5abac",
+          textAlign: "right",
+        }}
+      >
+        <a href="https://briansukhnandan.xyz">
+          Tap here to see more of my work!
+        </a>
+      </h6>
       <h1
         style={{
           paddingBottom: 10,
@@ -135,17 +146,6 @@ export default function Home() {
           </Box>
         ) : null
       }
-      <h6 
-        style={{ 
-          margin: "50px", 
-          fontSize: "16px", 
-          color: "#b5abac" 
-        }}
-      >
-        <a href="https://briansukhnandan.xyz">
-          Click here to see more of my work!
-        </a>
-      </h6>
     </main>
   );
 }
@@ -164,271 +164,285 @@ const TrainLineDisplay = ({
   }, [trainLines]);
 
   return (
-    <Box>
-      <Box 
-        style={{ 
-          display: "flex", 
-          flexDirection: "row", 
-          gap: "5px" 
-        }}
-      >
-        <Image 
-          src={trainIdToImage["A"]} 
-          alt="A Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("A");
+    <>
+      <Center>
+        <Box 
+          style={{ 
+            display: "flex", 
+            flexDirection: "row", 
+            gap: "5px",
           }}
-        />
-        <Image 
-          src={trainIdToImage["C"]} 
-          alt="C Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("C");
+        >
+          <Image 
+            src={trainIdToImage["A"]} 
+            alt="A Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("A");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["C"]} 
+            alt="C Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("C");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["E"]} 
+            alt="E Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("E");
+            }}
+          />
+        </Box>
+      </Center>
+      <Center>
+        <Box 
+          style={{ 
+            display: "flex", 
+            flexDirection: "row", 
+            gap: "5px" 
           }}
-        />
-        <Image 
-          src={trainIdToImage["E"]} 
-          alt="E Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("E");
+        >
+          <Image 
+            src={trainIdToImage["B"]} 
+            alt="B Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("B");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["D"]} 
+            alt="D Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("D");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["F"]} 
+            alt="F Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("F");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["M"]} 
+            alt="M Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("M");
+            }}
+          />
+        </Box>
+      </Center>
+      <Center>
+        <Box 
+          style={{ 
+            display: "flex", 
+            flexDirection: "row", 
+            gap: "5px" 
           }}
-        />
-      </Box>
-      <Box 
-        style={{ 
-          display: "flex", 
-          flexDirection: "row", 
-          gap: "5px" 
-        }}
-      >
-        <Image 
-          src={trainIdToImage["B"]} 
-          alt="B Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("B");
+        >
+          <Image 
+            src={trainIdToImage["N"]} 
+            alt="N Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("N");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["Q"]} 
+            alt="Q Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("Q");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["R"]} 
+            alt="R Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("R");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["W"]} 
+            alt="W Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("W");
+            }}
+          />
+        </Box>
+      </Center>
+      <Center>
+        <Box 
+          style={{ 
+            display: "flex", 
+            flexDirection: "row", 
+            gap: "5px" 
           }}
-        />
-        <Image 
-          src={trainIdToImage["D"]} 
-          alt="D Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("D");
+        >
+          <Image 
+            src={trainIdToImage["G"]} 
+            alt="G Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("G");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["L"]} 
+            alt="L Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("L");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["S"]} 
+            alt="S Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("S");
+            }}
+          />
+        </Box>
+      </Center>
+      <Center>
+        <Box 
+          style={{ 
+            display: "flex", 
+            flexDirection: "row", 
+            gap: "5px" 
           }}
-        />
-        <Image 
-          src={trainIdToImage["F"]} 
-          alt="F Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("F");
+        >
+          <Image 
+            src={trainIdToImage["J"]} 
+            alt="J Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("J");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["Z"]} 
+            alt="Z Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("Z");
+            }}
+          />
+        </Box>
+      </Center>
+      <Center>
+        <Box 
+          style={{ 
+            display: "flex", 
+            flexDirection: "row", 
+            gap: "5px" 
           }}
-        />
-        <Image 
-          src={trainIdToImage["M"]} 
-          alt="M Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("M");
+        >
+          <Image 
+            src={trainIdToImage["1"]} 
+            alt="1 Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("1");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["2"]} 
+            alt="2 Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("2");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["3"]} 
+            alt="3 Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("3");
+            }}
+          />
+        </Box>
+      </Center>
+      <Center>
+        <Box 
+          style={{ 
+            display: "flex", 
+            flexDirection: "row", 
+            gap: "5px" 
           }}
-        />
-      </Box>
-      <Box 
-        style={{ 
-          display: "flex", 
-          flexDirection: "row", 
-          gap: "5px" 
-        }}
-      >
-        <Image 
-          src={trainIdToImage["J"]} 
-          alt="J Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("J");
-          }}
-        />
-        <Image 
-          src={trainIdToImage["Z"]} 
-          alt="Z Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("Z");
-          }}
-        />
-      </Box>
-      <Box 
-        style={{ 
-          display: "flex", 
-          flexDirection: "row", 
-          gap: "5px" 
-        }}
-      >
-        <Image 
-          src={trainIdToImage["N"]} 
-          alt="N Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("N");
-          }}
-        />
-        <Image 
-          src={trainIdToImage["Q"]} 
-          alt="Q Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("Q");
-          }}
-        />
-        <Image 
-          src={trainIdToImage["R"]} 
-          alt="R Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("R");
-          }}
-        />
-        <Image 
-          src={trainIdToImage["W"]} 
-          alt="W Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("W");
-          }}
-        />
-      </Box>
-      <Box 
-        style={{ 
-          display: "flex", 
-          flexDirection: "row", 
-          gap: "5px" 
-        }}
-      >
-        <Image 
-          src={trainIdToImage["G"]} 
-          alt="G Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("G");
-          }}
-        />
-        <Image 
-          src={trainIdToImage["L"]} 
-          alt="L Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("L");
-          }}
-        />
-        <Image 
-          src={trainIdToImage["S"]} 
-          alt="S Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("S");
-          }}
-        />
-      </Box>
-      <Box 
-        style={{ 
-          display: "flex", 
-          flexDirection: "row", 
-          gap: "5px" 
-        }}
-      >
-        <Image 
-          src={trainIdToImage["1"]} 
-          alt="1 Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("1");
-          }}
-        />
-        <Image 
-          src={trainIdToImage["2"]} 
-          alt="2 Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("2");
-          }}
-        />
-        <Image 
-          src={trainIdToImage["3"]} 
-          alt="3 Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("3");
-          }}
-        />
-      </Box>
-      <Box 
-        style={{ 
-          display: "flex", 
-          flexDirection: "row", 
-          gap: "5px" 
-        }}
-      >
-        <Image 
-          src={trainIdToImage["4"]} 
-          alt="4 Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("4");
-          }}
-        />
-        <Image 
-          src={trainIdToImage["5"]} 
-          alt="5 Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("5");
-          }}
-        />
-        <Image 
-          src={trainIdToImage["6"]} 
-          alt="6 Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("6");
-          }}
-        />
-        <Image 
-          src={trainIdToImage["7"]} 
-          alt="7 Train Icon" 
-          width={64} 
-          height={64} 
-          onClick={() => {
-            selectCallback("7");
-          }}
-        />
-      </Box>
-    </Box>
+        >
+          <Image 
+            src={trainIdToImage["4"]} 
+            alt="4 Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("4");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["5"]} 
+            alt="5 Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("5");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["6"]} 
+            alt="6 Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("6");
+            }}
+          />
+          <Image 
+            src={trainIdToImage["7"]} 
+            alt="7 Train Icon" 
+            width={64} 
+            height={64} 
+            onClick={() => {
+              selectCallback("7");
+            }}
+          />
+        </Box>
+      </Center>
+    </>
   )
 }
 
