@@ -122,7 +122,7 @@ export default function Home() {
       >
         <b>{"Where are the NYC Subway Trains?"}</b>
       </h1>
-      <Box paddingBottom={"40px"} textAlign={"center"}>
+      <Box paddingBottom={5} textAlign={"center"}>
         <RefreshButton 
           action={() => getNewSchedule(selectedTrainLine)} 
           disableCriteria={!selectedTrainLine}
@@ -131,21 +131,25 @@ export default function Home() {
         { isLoading && <Box>{"Loading..."}</Box> }
       </Box>
       { !selectedTrainLine && (
-        <Box fontSize={"25px"}>
-          <i>Pick a Train to get started!</i>
-        </Box>
+        <Center>
+          <Box fontSize={"25px"}>
+            <i>Pick a Train to get started!</i>
+          </Box>
+        </Center>
       )}
       <TrainLineDisplay selectCallback={setTrainLine} />
-      {
-        (selectedTrainLine && !isLoading) ? (
-          <Box paddingTop={"50px"}>
-            <FeedDisplay 
-              trainId={selectedTrainLine} 
-              feed={schedules[selectedTrainLine]} 
-            />
-          </Box>
-        ) : null
-      }
+      <Box paddingTop={10}>
+        {
+          (selectedTrainLine && !isLoading) ? (
+            <Box paddingBottom={10}>
+              <FeedDisplay 
+                trainId={selectedTrainLine} 
+                feed={schedules[selectedTrainLine]} 
+              />
+            </Box>
+          ) : null
+        }
+      </Box>
     </main>
   );
 }
@@ -448,7 +452,11 @@ const TrainLineDisplay = ({
 
 const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => {
   if (!feed) {
-    return <div>No feeds available for this Line!</div>
+    return (
+      <Center>
+        <Box paddingBottom={10}>No feeds available for this Line!</Box>
+      </Center>
+    )
   }
 
   const stops = getStopListFromAllTrips(feed.trips);
