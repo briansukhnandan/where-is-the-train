@@ -16,7 +16,16 @@ import {
 } from "./types";
 import { TRAIN_LINE_TO_COLOR, getGeneralStopId } from "./util";
 import Image from 'next/image'
-import { Box, Button, Grid, GridItem, Text, Tooltip } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Grid,
+  GridItem,
+  Text,
+  Tooltip,
+  Divider,
+  Center
+} from "@chakra-ui/react";
 
 const trainLines = [
   "A", "B", "C", "D", "E",
@@ -88,7 +97,14 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      <h1 style={{ paddingBottom: "30px", fontSize: "40px" }}>
+      <h1
+        style={{
+          paddingBottom: 10,
+          paddingTop: 20,
+          fontSize: 40,
+          textAlign: "center"
+        }}
+      >
         <u><b>{"Where are the NYC Subway Trains?"}</b></u>
       </h1>
       <Box paddingBottom={"40px"} textAlign={"center"}>
@@ -144,7 +160,7 @@ const TrainLineDisplay = ({
   }, [trainLines]);
 
   return (
-    <Box margin={"auto"}>
+    <Box>
       <Box 
         style={{ 
           display: "flex", 
@@ -427,31 +443,38 @@ const FeedDisplay = ({ trainId, feed }: { trainId: string, feed: FeedData }) => 
     <Box 
       border={"solid"} 
       borderColor={TRAIN_LINE_TO_COLOR[trainId] ?? "black"}
-      borderRadius={"20px"}
+      borderRadius={8}
+      marginLeft={2}
+      marginRight={2}
     >
-      <Box margin={5}>
-        <Box 
-          paddingBottom={"40px"}
-          textAlign={"center"}
-        >
-          <Box
-            fontSize={"40px"}
-          >
-            <i>Stops on this Route</i>
-          </Box>
-          <h6>{"* You can also hover over individual Train icons for info!"}</h6>
+      <Box 
+        paddingBottom={5}
+        textAlign={"center"}
+      >
+        <Box fontSize={35}>
+          <i>Stops on this Route</i>
         </Box>
-        <Box>
-          {stops.map(stop => 
-            <StopDisplay
-              key={stop.id}
-              trainId={trainId} 
-              stop={stop} 
-              statuses={statuses} 
-              allStops={stops}
+      </Box>
+      <Box>
+        {stops.map(stop => 
+          <>
+          <StopDisplay
+            key={stop.id}
+            trainId={trainId} 
+            stop={stop} 
+            statuses={statuses} 
+            allStops={stops}
+          />
+          <Center>
+            <Divider 
+              orientation="horizontal" 
+              width={"50%"} 
+              paddingTop={0.5}
+              paddingBottom={2.25}
             />
-          )}
-        </Box>
+          </Center>
+          </>
+        )}
       </Box>
     </Box>
   );
@@ -548,12 +571,12 @@ const StopDisplay = ({ trainId, stop, statuses, allStops }: {
     <Box
       style={{ 
         textAlign: "center", 
-        paddingTop: 6,
-        paddingBottom: 6,
+        paddingTop: 7,
+        paddingBottom: 7,
       }}
     >
       <Grid templateColumns="repeat(3, 1fr)">
-        <GridItem paddingTop={"2px"}>
+        <GridItem>
           {
             trainsPointingDown.map(tripStatus => (
               <TrainDisplayBase
@@ -568,9 +591,9 @@ const StopDisplay = ({ trainId, stop, statuses, allStops }: {
         </GridItem>
         <GridItem
           style={{ 
-            fontSize: "20px", 
-            paddingLeft: "10px", 
-            paddingRight: "10px" 
+            fontSize: 16, 
+            paddingLeft: 10, 
+            paddingRight: 10 
           }}
         >
           { stop.name ?? `Stop (${stop.id})` }
